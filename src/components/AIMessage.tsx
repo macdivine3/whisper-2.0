@@ -1,7 +1,9 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useRef } from 'react';
+import { Animated, Image, StyleSheet, Text, View } from 'react-native';
 import { Colors, Spacing } from '../constants/theme';
+
+const LEAF_IMAGE = require('../../assets/images/leaf-transparent.png');
 
 interface AIMessageProps {
   message: string;
@@ -17,13 +19,13 @@ export default function AIMessage({
   showDecorativeLeaf = false,
 }: AIMessageProps) {
   // Entrance animation
-  const opacity  = useRef(new Animated.Value(0)).current;
-  const slideY   = useRef(new Animated.Value(8)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+  const slideY = useRef(new Animated.Value(8)).current;
 
   useEffect(() => {
     Animated.parallel([
       Animated.timing(opacity, { toValue: 1, duration: 350, useNativeDriver: true }),
-      Animated.timing(slideY,  { toValue: 0, duration: 350, useNativeDriver: true }),
+      Animated.timing(slideY, { toValue: 0, duration: 350, useNativeDriver: true }),
     ]).start();
   }, []);
 
@@ -32,7 +34,7 @@ export default function AIMessage({
       {/* Decorative leaf floating behind text */}
       {showDecorativeLeaf && (
         <View style={styles.leafDecor}>
-          <Ionicons name="leaf-outline" size={70} color={Colors.green.primary} />
+          <Image source={LEAF_IMAGE} style={styles.leafImage} resizeMode="contain" />
         </View>
       )}
 
@@ -59,10 +61,15 @@ const styles = StyleSheet.create({
   },
   leafDecor: {
     position: 'absolute',
-    right: 20,
-    top: 10,
-    opacity: 0.05,
-    transform: [{ rotate: '45deg' }],
+    right: 15,
+    top: -5,
+    zIndex: -1,
+    opacity: 1,
+  },
+  leafImage: {
+    width: 140,
+    height: 140,
+    transform: [{ rotate: '25deg' }],
   },
   header: {
     flexDirection: 'row',
@@ -98,3 +105,4 @@ const styles = StyleSheet.create({
     lineHeight: 25,
   },
 });
+

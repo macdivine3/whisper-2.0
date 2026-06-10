@@ -1,500 +1,500 @@
-import React, { useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
+  Dimensions,
+  Image,
   SafeAreaView,
   ScrollView,
-  TouchableOpacity,
-  Platform,
   StatusBar,
-  TextInput,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Radius, Shadows, CommonStyles } from '../../constants/theme';
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
+import {
+  Colors,
+  Radius,
+  Shadows,
+  Spacing
+} from "../../constants/theme";
+
+const { width } = Dimensions.get("window");
+
+// Assets
+const CANDLE_IMAGE = require("../../../svjs/candle.jpg");
+const BOOK_LEAF_IMAGE = require("../../../svjs/book + leaf.jpg");
+const LEAF_BG = require("../../../assets/images/leaf-transparent.png");
 
 interface JournalEntry {
   id: string;
   title: string;
   date: string;
   excerpt: string;
-  mood: 'grateful' | 'hopeful' | 'peaceful' | 'anxious' | 'drained' | 'overwhelmed';
-  moodIcon: keyof typeof Ionicons.glyphMap;
-  isBookmarked?: boolean;
+  mood: string;
+  color: string;
 }
 
 export default function JournalScreen() {
-  const [activeTab, setActiveTab] = useState<'entries' | 'favorites' | 'prompts'>('entries');
-  const [entries, setEntries] = useState<JournalEntry[]>([
+  const [entries] = useState<JournalEntry[]>([
     {
-      id: 'e1',
-      title: 'Feeling Overwhelmed',
-      date: 'May 18, 2025',
-      excerpt: "Today was a lot. My mind wouldn't stop racing and I felt like I was failing in so...",
-      mood: 'anxious',
-      moodIcon: 'cloud',
-      isBookmarked: true,
+      id: "e1",
+      title: "surrendering my plans",
+      date: "MAY 18",
+      excerpt:
+        "Today I realized that my need for control is just a mask for my fear. I'm learning to let go...",
+      mood: "peaceful",
+      color: "#4A7231",
     },
     {
-      id: 'e2',
-      title: 'Grateful for the Little Things',
-      date: 'May 17, 2025',
-      excerpt: 'God really showed up in the small moments today. The sunrise, a kind...',
-      mood: 'grateful',
-      moodIcon: 'leaf',
-      isBookmarked: false,
+      id: "e2",
+      title: "the weight of waiting",
+      date: "MAY 16",
+      excerpt:
+        "Waiting isn't passive. It's an active trust. Even when the silence feels heavy, He is working...",
+      mood: "hopeful",
+      color: "#C9851A",
     },
     {
-      id: 'e3',
-      title: 'A Quiet Night Prayer',
-      date: 'May 16, 2025',
-      excerpt: "Lord, I'm laying it all down tonight. Thank You for being close when...",
-      mood: 'hopeful',
-      moodIcon: 'sunny',
-      isBookmarked: true,
+      id: "e3",
+      title: "finding beauty in ruins",
+      date: "MAY 12",
+      excerpt:
+        "Even the broken pieces of my story have a place in His masterpiece. Every tear is seen.",
+      mood: "grateful",
+      color: "#B05555",
     },
   ]);
-
-  const favorites = entries.filter((e) => e.isBookmarked);
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.logo}>journal.</Text>
-          <Text style={styles.tagline}>a space for your heart</Text>
-        </View>
-        <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.searchBtn} activeOpacity={0.6}>
-            <Ionicons name="search-outline" size={20} color={Colors.text.primary} />
-          </TouchableOpacity>
-          <View style={styles.addBtnContainer}>
-            <TouchableOpacity style={styles.addBtn} activeOpacity={0.8}>
-              <Ionicons name="add" size={24} color={Colors.white} />
-            </TouchableOpacity>
-            <Text style={styles.addBtnLabel}>new entry</Text>
-          </View>
-        </View>
-      </View>
-
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Navigation Tabs */}
-        <View style={styles.tabContainer}>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'entries' && styles.activeTab]}
-            onPress={() => setActiveTab('entries')}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.tabText, activeTab === 'entries' && styles.activeTabText]}>My Entries</Text>
+        {/* Header */}
+        <View style={styles.headerRow}>
+          <View>
+            <Text style={styles.logo}>journal</Text>
+            <Text style={styles.tagline}>a space for your heart</Text>
+          </View>
+
+          <View style={styles.headerActions}>
+            <TouchableOpacity style={styles.iconBtn}>
+              <Ionicons
+                name="search-outline"
+                size={18}
+                color={Colors.text.primary}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.addBtn}>
+              <Ionicons name="add" size={20} color={Colors.white} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Segmented Tabs */}
+        <View style={styles.segmentRow}>
+          <TouchableOpacity style={[styles.segmentItem, styles.segmentActive]}>
+            <Text style={[styles.segmentText, styles.segmentTextActive]}>
+              My Entries
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'favorites' && styles.activeTab]}
-            onPress={() => setActiveTab('favorites')}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.tabText, activeTab === 'favorites' && styles.activeTabText]}>Favorites</Text>
+          <TouchableOpacity style={styles.segmentItem}>
+            <Text style={styles.segmentText}>Favorites</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'prompts' && styles.activeTab]}
-            onPress={() => setActiveTab('prompts')}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.tabText, activeTab === 'prompts' && styles.activeTabText]}>Prompts</Text>
+          <TouchableOpacity style={styles.segmentItem}>
+            <Text style={styles.segmentText}>Prompts</Text>
           </TouchableOpacity>
         </View>
 
-        {activeTab === 'entries' && (
-          <>
-            {/* Today's Reflection Prompter Card */}
-            <View style={styles.reflectionCard}>
-              <View style={styles.reflectionContent}>
-                <View style={styles.reflectionHeader}>
-                  <Ionicons name="sunny" size={14} color={Colors.mood.hopeful} style={{ marginRight: 6 }} />
-                  <Text style={styles.reflectionTitle}>TODAY'S REFLECTION</Text>
-                </View>
-                <Text style={styles.promptText}>
-                  What's something you're learning to surrender into God's hands?
+        {/* Featured Prompt Card (soft horizontal) */}
+        <View style={styles.featuredSmallWrap}>
+          <View style={styles.featuredSmall}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.featuredSmallLabel}>TODAY'S REFLECTION</Text>
+              <Text style={styles.featuredSmallTitle}>
+                What's something you're learning to surrender into God's hands?
+              </Text>
+              <TouchableOpacity style={styles.featuredSmallCta}>
+                <Text style={styles.featuredSmallCtaText}>
+                  take a moment to write
                 </Text>
-                <TouchableOpacity style={styles.promptAction} activeOpacity={0.6}>
-                  <Text style={styles.promptActionText}>take a moment to write</Text>
-                  <Ionicons name="leaf-outline" size={12} color={Colors.green.primary} />
-                </TouchableOpacity>
-              </View>
-
-              {/* Decorative Notebook Vector/Illustration representation */}
-              <View style={styles.notebookIllustration}>
-                <Ionicons name="book" size={60} color="#E6C594" opacity={0.65} />
-                <Ionicons name="create-outline" size={24} color={Colors.green.primary} style={styles.penIcon} />
-              </View>
-            </View>
-
-            {/* Recent Entries Section */}
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>RECENT ENTRIES</Text>
-              <TouchableOpacity activeOpacity={0.6}>
-                <Text style={styles.viewAllLink}>view all <Ionicons name="chevron-forward" size={10} /></Text>
               </TouchableOpacity>
             </View>
+            <Image
+              source={BOOK_LEAF_IMAGE}
+              style={styles.featuredSmallImage}
+              resizeMode="contain"
+            />
+          </View>
+        </View>
 
-            {/* Entries List */}
-            <View style={styles.entriesList}>
-              {entries.map((entry) => (
-                <View key={entry.id} style={styles.entryRow}>
-                  {/* Mood Icon Rounded Box */}
-                  <View style={[styles.moodIconBox, { backgroundColor: Colors.moodBg[entry.mood] }]}>
-                    <Ionicons name={entry.moodIcon} size={22} color={Colors.mood[entry.mood]} />
-                  </View>
+        {/* Recent Entries */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>RECENT ENTRIES</Text>
+          <TouchableOpacity>
+            <Text style={styles.viewAll}>view all</Text>
+          </TouchableOpacity>
+        </View>
 
-                  {/* Text Contents */}
-                  <View style={styles.entryDetails}>
-                    <View style={styles.entryHeaderRow}>
-                      <Text style={styles.entryTitle}>{entry.title}</Text>
-                      <View style={styles.dateAndBookmark}>
-                        <Text style={styles.entryDate}>{entry.date}</Text>
-                        <Ionicons 
-                          name={entry.isBookmarked ? "bookmark" : "bookmark-outline"} 
-                          size={14} 
-                          color={entry.isBookmarked ? Colors.green.primary : Colors.text.muted} 
-                          style={{ marginLeft: 6 }}
-                        />
-                      </View>
-                    </View>
-                    <Text style={styles.entryExcerpt} numberOfLines={2}>{entry.excerpt}</Text>
-                    
-                    {/* Tiny Mood Tag Capsule */}
-                    <View style={[styles.moodTag, { backgroundColor: Colors.moodBg[entry.mood] }]}>
-                      <Text style={[styles.moodTagText, { color: Colors.mood[entry.mood] }]}>{entry.mood}</Text>
-                    </View>
-                  </View>
-                </View>
-              ))}
-            </View>
-
-            {/* Bottom Quote Card */}
-            <View style={styles.quoteCard}>
-              <View style={styles.quoteWatermark}>
-                <Ionicons name="leaf-outline" size={120} color={Colors.green.primary} />
-              </View>
-              <Ionicons name="chatbubble-ellipses" size={24} color="#E8DCC8" style={{ marginBottom: 6 }} />
-              <Text style={styles.quoteText}>
-                "You keep track of all my sorrows. You have collected all my tears in your bottle."
-              </Text>
-              <Text style={styles.quoteReference}>PSALM 56:8</Text>
-            </View>
-          </>
-        )}
-
-        {activeTab === 'favorites' && (
-          <View style={styles.entriesList}>
-            {favorites.map((entry) => (
-              <View key={entry.id} style={styles.entryRow}>
-                <View style={[styles.moodIconBox, { backgroundColor: Colors.moodBg[entry.mood] }]}>
-                  <Ionicons name={entry.moodIcon} size={22} color={Colors.mood[entry.mood]} />
-                </View>
-                <View style={styles.entryDetails}>
-                  <View style={styles.entryHeaderRow}>
-                    <Text style={styles.entryTitle}>{entry.title}</Text>
-                    <Text style={styles.entryDate}>{entry.date}</Text>
-                  </View>
-                  <Text style={styles.entryExcerpt} numberOfLines={2}>{entry.excerpt}</Text>
-                  <View style={[styles.moodTag, { backgroundColor: Colors.moodBg[entry.mood] }]}>
-                    <Text style={[styles.moodTagText, { color: Colors.mood[entry.mood] }]}>{entry.mood}</Text>
-                  </View>
+        <View style={styles.entriesList}>
+          {entries.map((entry) => (
+            <TouchableOpacity
+              key={entry.id}
+              style={styles.entryCardNew}
+              activeOpacity={0.85}
+            >
+              <View style={styles.entryLeftIconWrap}>
+                <View
+                  style={[
+                    styles.entryIcon,
+                    { backgroundColor: getMoodBg(entry.mood) },
+                  ]}
+                >
+                  <Ionicons
+                    name={iconForMood(entry.mood)}
+                    size={20}
+                    color={Colors.green.primary}
+                  />
                 </View>
               </View>
-            ))}
-          </View>
-        )}
 
-        {activeTab === 'prompts' && (
-          <View style={styles.promptsList}>
-            <Text style={styles.promptRow}>• How has God shown His faithfulness to you this week?</Text>
-            <Text style={styles.promptRow}>• Write down a moment of unexpected joy you experienced today.</Text>
-            <Text style={styles.promptRow}>• What is a burden you need to release before you sleep?</Text>
-          </View>
-        )}
+              <View style={styles.entryMain}>
+                <Text style={styles.entryTitleNew}>{entry.title}</Text>
+                <Text style={styles.entryExcerptNew} numberOfLines={1}>
+                  {entry.excerpt}
+                </Text>
+              </View>
 
-        {/* Space for navigation tabs */}
+              <View style={styles.entryRight}>
+                <Text style={styles.entryDateNew}>{entry.date}</Text>
+                <Ionicons
+                  name="bookmark-outline"
+                  size={16}
+                  color={Colors.text.muted}
+                />
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Favorites */}
+        <View style={[styles.sectionHeader, { marginTop: Spacing.xl }]}>
+          <Text style={styles.sectionTitle}>FAVORITES</Text>
+          <TouchableOpacity>
+            <Text style={styles.viewAll}>view all</Text>
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity style={styles.favoriteCard} activeOpacity={0.85}>
+          <View style={styles.favoriteLeft}>
+            <View
+              style={[
+                styles.favoriteIcon,
+                { backgroundColor: Colors.moodBg.peaceful },
+              ]}
+            >
+              <Ionicons name="heart" size={18} color={Colors.green.primary} />
+            </View>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.favoriteTitle}>When I Needed Peace</Text>
+            <Text style={styles.favoriteExcerpt} numberOfLines={1}>
+              You calmed my heart in ways I can't even explain. You always...
+            </Text>
+          </View>
+          <View style={{ marginLeft: 12 }}>
+            <Text style={styles.favoriteDate}>May 12, 2025</Text>
+          </View>
+        </TouchableOpacity>
+
+        {/* Quote Banner */}
+        <View style={styles.quoteWrap}>
+          <Text style={styles.quoteText}>
+            “You keep track of all my sorrows. You have collected all my tears
+            in your bottle.”
+          </Text>
+          <Text style={styles.quoteRef}>PSALM 56:8</Text>
+        </View>
+
         <View style={styles.bottomSpacer} />
       </ScrollView>
     </SafeAreaView>
   );
 }
 
+function getMoodBg(mood: string) {
+  switch (mood) {
+    case "grateful":
+      return Colors.moodBg.grateful;
+    case "hopeful":
+      return Colors.moodBg.hopeful;
+    case "peaceful":
+      return Colors.moodBg.peaceful;
+    case "anxious":
+      return Colors.moodBg.anxious;
+    default:
+      return Colors.bg.secondary;
+  }
+}
+
+function iconForMood(mood: string) {
+  switch (mood) {
+    case "grateful":
+      return "sunny-outline";
+    case "hopeful":
+      return "sunny-outline";
+    case "peaceful":
+      return "leaf-outline";
+    case "anxious":
+      return "cloudy-outline";
+    default:
+      return "book-outline";
+  }
+}
+
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: Colors.bg.primary,
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-  },
-  logo: {
-    fontFamily: 'NotoSerif_700Bold',
-    fontSize: 26,
-    color: Colors.green.primary,
-  },
-  tagline: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 11,
-    color: Colors.text.muted,
-    marginTop: -2,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  searchBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: Radius.circle,
-    backgroundColor: Colors.bg.card,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.border.soft,
-    marginRight: Spacing.md,
-    ...Shadows.sm,
-  },
-  addBtnContainer: {
-    alignItems: 'center',
-  },
-  addBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: Radius.circle,
-    backgroundColor: Colors.green.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...Shadows.sm,
-  },
-  addBtnLabel: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 9,
-    color: Colors.text.secondary,
-    marginTop: 4,
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 120,
+    paddingBottom: 140,
   },
-  tabContainer: {
-    flexDirection: 'row',
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingHorizontal: Spacing.lg,
-    marginVertical: Spacing.sm,
-    gap: Spacing.xs,
+    paddingTop: Spacing.xl,
+    paddingBottom: Spacing.sm,
+    alignItems: "center",
   },
-  tab: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 8,
-    borderRadius: Radius.pill,
+  logo: {
+    fontFamily: "NotoSerif_700Bold",
+    fontSize: 30,
+    color: Colors.text.primary,
+  },
+  tagline: {
+    fontFamily: "Inter_500Medium",
+    fontSize: 13,
+    color: Colors.text.muted,
+    marginTop: 4,
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  iconBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: Radius.circle,
     backgroundColor: Colors.bg.card,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: Spacing.sm,
     borderWidth: 1,
     borderColor: Colors.border.soft,
   },
-  activeTab: {
+  addBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: Radius.circle,
+    backgroundColor: Colors.green.primary,
+    justifyContent: "center",
+    alignItems: "center",
+    ...Shadows.md,
+  },
+  segmentRow: {
+    flexDirection: "row",
+    paddingHorizontal: Spacing.lg,
+    marginTop: Spacing.md,
+    gap: 8,
+  },
+  segmentItem: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.bg.card,
+  },
+  segmentActive: {
     backgroundColor: Colors.green.faint,
-    borderColor: Colors.green.muted,
   },
-  tabText: {
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 12,
-    color: Colors.text.secondary,
+  segmentText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 13,
+    color: Colors.text.muted,
   },
-  activeTabText: {
+  segmentTextActive: {
     color: Colors.green.primary,
   },
-  reflectionCard: {
-    flexDirection: 'row',
+  featuredSmallWrap: {
+    paddingHorizontal: Spacing.lg,
+    marginTop: Spacing.md,
+  },
+  featuredSmall: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: Colors.bg.card,
     borderRadius: Radius.lg,
     padding: Spacing.lg,
-    marginHorizontal: Spacing.lg,
-    marginVertical: Spacing.sm,
-    borderWidth: 1,
-    borderColor: Colors.border.default,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    overflow: 'hidden',
     ...Shadows.sm,
   },
-  reflectionContent: {
-    flex: 1,
-    paddingRight: Spacing.sm,
+  featuredSmallLabel: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 12,
+    color: Colors.text.muted,
+    marginBottom: 6,
   },
-  reflectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.xs,
-  },
-  reflectionTitle: {
-    ...CommonStyles.smallCaps,
-    color: Colors.green.secondary,
-    fontSize: 9,
-  },
-  promptText: {
-    fontFamily: 'NotoSerif_700Bold',
+  featuredSmallTitle: {
+    fontFamily: "NotoSerif_700Bold",
     fontSize: 16,
     color: Colors.text.primary,
     lineHeight: 22,
-    marginBottom: Spacing.md,
   },
-  promptAction: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  featuredSmallCta: {
+    marginTop: Spacing.sm,
   },
-  promptActionText: {
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 12,
+  featuredSmallCtaText: {
     color: Colors.green.primary,
-    marginRight: 4,
+    fontFamily: "Inter_600SemiBold",
   },
-  notebookIllustration: {
-    position: 'relative',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 70,
-    height: 70,
-  },
-  penIcon: {
-    position: 'absolute',
-    bottom: 5,
-    right: 5,
+  featuredSmallImage: {
+    width: 88,
+    height: 88,
+    marginLeft: Spacing.md,
+    borderRadius: Radius.md,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingHorizontal: Spacing.lg,
-    marginTop: Spacing.lg,
-    marginBottom: Spacing.sm,
+    marginTop: Spacing.xl,
+    marginBottom: Spacing.md,
+    alignItems: "center",
   },
   sectionTitle: {
-    ...CommonStyles.smallCaps,
-    color: Colors.text.muted,
-    fontSize: 10,
-  },
-  viewAllLink: {
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: "Inter_700Bold",
     fontSize: 11,
-    color: Colors.green.secondary,
+    letterSpacing: 1.5,
+    color: Colors.text.muted,
+  },
+  viewAll: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 12,
+    color: Colors.green.primary,
   },
   entriesList: {
     paddingHorizontal: Spacing.lg,
-    gap: Spacing.sm,
   },
-  entryRow: {
-    flexDirection: 'row',
+  entryCardNew: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: Colors.bg.card,
-    borderRadius: Radius.md,
-    padding: Spacing.md,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    borderRadius: Radius.lg,
+    marginBottom: Spacing.sm,
     borderWidth: 1,
     borderColor: Colors.border.soft,
-    alignItems: 'flex-start',
-    ...Shadows.sm,
   },
-  moodIconBox: {
+  entryLeftIconWrap: {
+    width: 56,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: Spacing.sm,
+  },
+  entryIcon: {
     width: 44,
     height: 44,
     borderRadius: Radius.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: Spacing.md,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  entryDetails: {
+  entryMain: {
     flex: 1,
   },
-  entryHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  entryTitle: {
-    fontFamily: 'NotoSerif_700Bold',
-    fontSize: 14,
+  entryTitleNew: {
+    fontFamily: "NotoSerif_700Bold",
+    fontSize: 16,
     color: Colors.text.primary,
   },
-  dateAndBookmark: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  entryExcerptNew: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 13,
+    color: Colors.text.secondary,
+    marginTop: 4,
   },
-  entryDate: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 10,
-    color: Colors.text.muted,
+  entryRight: {
+    alignItems: "flex-end",
+    marginLeft: Spacing.md,
   },
-  entryExcerpt: {
-    fontFamily: 'Inter_400Regular',
+  entryDateNew: {
+    fontFamily: "Inter_700Bold",
     fontSize: 12,
-    color: Colors.text.secondary,
-    lineHeight: 16,
-    marginBottom: Spacing.xs,
+    color: Colors.text.muted,
+    marginBottom: 8,
   },
-  moodTag: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: Spacing.xs,
-    paddingVertical: 2,
-    borderRadius: Radius.sm,
-  },
-  moodTagText: {
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 9,
-    textTransform: 'lowercase',
-  },
-  quoteCard: {
-    marginHorizontal: Spacing.lg,
-    marginTop: Spacing.xl,
+  favoriteCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.bg.card,
     padding: Spacing.lg,
-    borderRadius: Radius.md,
+    marginHorizontal: Spacing.lg,
+    borderRadius: Radius.lg,
     borderWidth: 1,
-    borderColor: Colors.border.default,
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  quoteWatermark: {
-    position: 'absolute',
-    bottom: -30,
-    right: -20,
-    opacity: 0.03,
-    transform: [{ rotate: '-15deg' }],
-  },
-  quoteText: {
-    fontFamily: 'NotoSerif_400Regular_Italic',
-    fontSize: 15,
-    color: Colors.text.secondary,
-    lineHeight: 22,
+    borderColor: Colors.border.soft,
     marginBottom: Spacing.sm,
   },
-  quoteReference: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 10,
+  favoriteLeft: {
+    marginRight: Spacing.md,
+  },
+  favoriteIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: Radius.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  favoriteTitle: {
+    fontFamily: "NotoSerif_700Bold",
+    fontSize: 16,
+    color: Colors.text.primary,
+  },
+  favoriteExcerpt: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 13,
+    color: Colors.text.secondary,
+    marginTop: 4,
+  },
+  favoriteDate: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 12,
     color: Colors.text.muted,
-    letterSpacing: 0.5,
   },
-  promptsList: {
-    paddingHorizontal: Spacing.lg,
-    marginTop: Spacing.md,
-    gap: Spacing.md,
+  quoteWrap: {
+    marginHorizontal: Spacing.lg,
+    marginTop: Spacing.lg,
+    padding: Spacing.lg,
+    backgroundColor: Colors.bg.card,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: Colors.border.soft,
   },
-  promptRow: {
-    fontFamily: 'NotoSerif_400Regular',
+  quoteText: {
+    fontFamily: "NotoSerif_700Bold",
     fontSize: 14,
     color: Colors.text.primary,
-    lineHeight: 20,
+    marginBottom: 8,
+  },
+  quoteRef: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 12,
+    color: Colors.text.muted,
   },
   bottomSpacer: {
-    height: 100,
+    height: 80,
   },
 });

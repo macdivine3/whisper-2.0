@@ -310,8 +310,8 @@ const styles = StyleSheet.create({
   },
   footer: {
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.xs,
-    paddingBottom: Platform.OS === 'ios' ? 100 : 90, // Leave clear spacing above floating tabs
+    paddingTop: Spacing.sm,
+    paddingBottom: Platform.OS === 'ios' ? 24 : 16, // Reduced since tab bar is hidden
     backgroundColor: Colors.bg.primary,
   },
   inputContainer: {
@@ -320,10 +320,10 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.bg.card,
     borderRadius: Radius.pill,
     borderWidth: 1,
-    borderColor: Colors.border.default,
+    borderColor: Colors.border.soft,
     paddingHorizontal: Spacing.sm,
-    paddingVertical: 6,
-    ...Shadows.sm,
+    paddingVertical: 8,
+    ...Shadows.float, // Outward feeling shadow
   },
   inputLeaf: {
     marginLeft: 6,

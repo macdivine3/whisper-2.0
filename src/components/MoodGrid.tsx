@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Radius, Spacing } from '../constants/theme';
+import { Colors, Radius, Spacing, Shadows } from '../constants/theme';
 
 interface MoodItem {
   id: string;
@@ -13,12 +13,12 @@ interface MoodItem {
 
 // Exactly 6 moods — 3 columns x 2 rows — icons match the mockup
 const MOODS: MoodItem[] = [
-  { id: 'grateful',    label: 'grateful',    icon: 'leaf',          color: '#4D7C5A', bgColor: '#E8F0E9' },
-  { id: 'hopeful',     label: 'hopeful',     icon: 'sunny',         color: '#C47F2A', bgColor: '#FDF0DC' },
-  { id: 'peaceful',    label: 'peaceful',    icon: 'leaf-outline',  color: '#4A8FA8', bgColor: '#E0F0F5' },
-  { id: 'anxious',     label: 'anxious',     icon: 'cloud',         color: '#B05A5A', bgColor: '#FAE8E8' },
-  { id: 'drained',     label: 'drained',     icon: 'water',         color: '#7A7A9A', bgColor: '#EEEEF5' },
-  { id: 'overwhelmed', label: 'overwhelmed', icon: 'rainy',         color: '#5A7A9A', bgColor: '#E8EEF5' },
+  { id: 'grateful',    label: 'grateful',    icon: 'leaf',          color: '#4D7C5A', bgColor: '#F0F5F1' },
+  { id: 'hopeful',     label: 'hopeful',     icon: 'sunny',         color: '#C47F2A', bgColor: '#FCF5EB' },
+  { id: 'peaceful',    label: 'peaceful',    icon: 'leaf-outline',  color: '#4A8FA8', bgColor: '#F0F7F9' },
+  { id: 'anxious',     label: 'anxious',     icon: 'cloud',         color: '#B05A5A', bgColor: '#F9F1F1' },
+  { id: 'drained',     label: 'drained',     icon: 'water',         color: '#7A7A9A', bgColor: '#F3F3F7' },
+  { id: 'overwhelmed', label: 'overwhelmed', icon: 'rainy',         color: '#5A7A9A', bgColor: '#F1F5F9' },
 ];
 
 interface MoodGridProps {
@@ -73,63 +73,66 @@ export default function MoodGrid({ onSelectMood, selectedMood }: MoodGridProps) 
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: Spacing.lg,
-    marginTop: Spacing.lg,
+    marginTop: Spacing.xl, // More breathing room
     marginBottom: Spacing.md,
   },
   sectionTitle: {
     fontFamily: 'Inter_700Bold',
-    fontSize: 10,
-    letterSpacing: 1.0,
+    fontSize: 9, // Smaller, more precise small-caps
+    letterSpacing: 1.5,
     textTransform: 'uppercase',
     color: Colors.green.primary,
-    marginBottom: Spacing.xs,
+    marginBottom: 6,
+    opacity: 0.8,
   },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.md,
   },
   leftHeader: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   subtitle: {
-    fontFamily: 'NotoSerif_400Regular',
-    fontSize: 16,
+    fontFamily: 'NotoSerif_700Bold', // Bold serif to match other headers
+    fontSize: 20,
     color: Colors.text.primary,
+    letterSpacing: -0.3,
   },
   infoIcon: {
-    marginLeft: 6,
-    marginTop: 1,
+    marginLeft: 8,
+    marginTop: 2,
   },
   editLink: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 12,
-    color: Colors.text.muted,
+    color: Colors.green.primary, // Links usually brand color
   },
   // 3-column grid
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 10, // Slightly more gap
   },
   moodPill: {
-    width: '31%',
+    width: '31.2%',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
     borderRadius: Radius.md,
     borderWidth: 1,
     borderColor: 'transparent',
+    ...Shadows.sm,
   },
   icon: {
-    marginRight: 5,
+    marginRight: 6,
   },
   moodLabel: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 12,
+    fontFamily: 'Inter_600SemiBold', // Slightly bolder label
+    fontSize: 11,
     textTransform: 'lowercase',
     flexShrink: 1,
   },

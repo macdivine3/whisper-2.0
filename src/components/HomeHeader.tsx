@@ -20,7 +20,7 @@ export default function HomeHeader({
       <View style={styles.logoBlock}>
         <View style={styles.logoRow}>
           <Text style={styles.logo}>whisper.</Text>
-          <Ionicons name="leaf" size={10} color={Colors.green.primary} style={styles.logoLeaf} />
+          <Ionicons name="leaf" size={12} color={Colors.green.primary} style={styles.logoLeaf} />
         </View>
         <Text style={styles.tagline}>your safe sanctuary</Text>
       </View>
@@ -30,7 +30,7 @@ export default function HomeHeader({
         <TouchableOpacity style={styles.followUpBtn} onPress={onFollowUpPress} activeOpacity={0.7}>
           <Text style={styles.followUpText}>Follow-up</Text>
           <View style={styles.bellContainer}>
-            <Ionicons name="notifications-outline" size={16} color={Colors.text.secondary} />
+            <Ionicons name="notifications-outline" size={18} color={Colors.text.primary} />
             {hasNotifications && <View style={styles.notifDot} />}
           </View>
         </TouchableOpacity>
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.md,
-    paddingBottom: Spacing.sm,
+    paddingBottom: Spacing.xs, // Reduced padding to match the tight mockup spacing
     backgroundColor: 'transparent',
   },
   logoBlock: {
@@ -54,48 +54,49 @@ const styles = StyleSheet.create({
   },
   logoRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'center',
   },
   logo: {
     fontFamily: 'NotoSerif_700Bold',
-    fontSize: 26,
+    fontSize: 28, // Slightly larger to match the image impact
     color: Colors.green.primary,
-    letterSpacing: -0.5,
-    lineHeight: 30,
+    letterSpacing: -0.8,
+    lineHeight: 34,
   },
   logoLeaf: {
-    marginLeft: 2,
-    marginBottom: 5,
+    marginLeft: 3,
+    marginBottom: 4,
   },
   tagline: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 11,
+    fontFamily: 'Inter_500Medium',
+    fontSize: 10, // Smaller, tighter tagline
     color: Colors.text.muted,
-    marginTop: 1,
-    letterSpacing: 0.1,
+    marginTop: -2,
+    letterSpacing: 0.2,
+    textTransform: 'lowercase',
   },
   rightRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
   },
   followUpBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.bg.card,
     borderRadius: Radius.pill,
-    paddingLeft: 16,
-    paddingRight: 12,
-    paddingVertical: 8,
+    paddingLeft: 18,
+    paddingRight: 14,
+    paddingVertical: 10,
     borderWidth: 1,
     borderColor: Colors.border.soft,
     ...Shadows.sm,
   },
   followUpText: {
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'Inter_700Bold', // Bolder font weight for "Follow-up"
     fontSize: 13,
-    color: Colors.text.secondary,
-    marginRight: 8,
+    color: Colors.text.primary,
+    marginRight: 10,
+    letterSpacing: -0.2,
   },
   bellContainer: {
     position: 'relative',
@@ -104,13 +105,14 @@ const styles = StyleSheet.create({
   },
   notifDot: {
     position: 'absolute',
-    top: -2,
-    right: -2,
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: Colors.green.primary,
+    top: 0,
+    right: 0,
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: '#D15D5D', // Soft red notification dot to contrast the green
     borderWidth: 1.5,
     borderColor: Colors.bg.card,
   },
 });
+

@@ -5,11 +5,12 @@
 export const Colors = {
   // Backgrounds
   bg: {
-    primary: '#F7F3EA',      // Light warm parchment — main screen background
+    primary: '#F9F6F0',      // Lighter, cleaner warm parchment
     secondary: '#F5F0E6',    // Slightly deeper parchment — card insets
-    card: '#FDFAF6',         // Almost white warm — card surfaces
-    modal: '#F8F3E8',        // Modal backgrounds
+    card: '#FFFFFF',         // Pure white for cards to pop against the parchment
+    modal: '#F9F6F0',        // Modal backgrounds
   },
+
 
   // Primary Theme Colors (Forest Green)
   green: {

@@ -1,14 +1,19 @@
-import { Tabs } from 'expo-router';
+import { Tabs, useSegments } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { View, StyleSheet, Platform } from 'react-native';
 import { Colors, Radius, Shadows, Spacing } from '../../constants/theme';
 
 export default function TabLayout() {
+  const segments = useSegments();
+  
+  // Hide tab bar on the whispers chat screen
+  const isWhisperChat = segments.includes('whispers');
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: isWhisperChat ? { display: 'none' } : styles.tabBar,
         tabBarShowLabel: true,
         tabBarActiveTintColor: Colors.green.primary,
         tabBarInactiveTintColor: Colors.text.muted,
@@ -75,35 +80,41 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: Colors.bg.card,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)', // Slight transparency for a glass look
     position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 24 : 16,
-    left: 16,
-    right: 16,
+    bottom: Platform.OS === 'ios' ? 34 : 20, // Raised higher to match the floating style
+    left: 20,
+    right: 20,
     borderRadius: Radius.pill,
-    height: 70,
+    height: 72,
     borderTopWidth: 0,
-    ...Shadows.md,
-    paddingBottom: 8,
-    paddingTop: 8,
+    ...Shadows.float, // Stronger shadow to make it "float"
+    paddingBottom: Platform.OS === 'ios' ? 0 : 4,
+    paddingTop: 0,
+    elevation: 10,
   },
   tabBarLabel: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 10,
-    marginTop: 2,
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 9,
+    marginTop: -4,
+    letterSpacing: 0.1,
   },
   iconContainer: {
-    width: 36,
-    height: 36,
+    width: 42,
+    height: 42,
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 8,
   },
   activeIconContainer: {
-    width: 36,
-    height: 36,
+    width: 42,
+    height: 42,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: Colors.green.primary,
     borderRadius: Radius.circle,
+    marginTop: 8,
+    ...Shadows.sm,
   },
 });
+

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import * as Clipboard from 'expo-clipboard';
 import { Colors, Radius, Spacing, Shadows } from '../constants/theme';
+
+const LEAF_IMAGE = require('../../assets/images/leaf-transparent.png');
 
 interface ScriptureCardProps {
   verse?: string;
@@ -33,14 +35,14 @@ export default function ScriptureCard({
   return (
     <View style={styles.outerContainer}>
       <LinearGradient
-        colors={['#F9F4EA', '#F0E5D3']}
+        colors={['#F3EAD9', '#E6DCC8']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.card}
       >
         {/* Leaf Watermark */}
         <View style={styles.watermarkContainer}>
-          <Ionicons name="leaf-outline" size={90} color={Colors.green.primary} />
+          <Image source={LEAF_IMAGE} style={styles.watermarkImage} resizeMode="contain" />
         </View>
 
         {/* Top label row */}
@@ -102,10 +104,15 @@ const styles = StyleSheet.create({
   },
   watermarkContainer: {
     position: 'absolute',
-    bottom: -20,
-    right: -12,
-    opacity: 0.04,
-    transform: [{ rotate: '-20deg' }],
+    bottom: -35,
+    right: -20,
+    opacity: 0.25, // Increased visibility
+    zIndex: 0,
+  },
+  watermarkImage: {
+    width: 150,
+    height: 150,
+    transform: [{ rotate: '-18deg' }],
   },
   topRow: {
     flexDirection: 'row',
@@ -157,3 +164,4 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_600SemiBold',
   },
 });
+

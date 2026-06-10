@@ -98,7 +98,7 @@ export default function HomeScreen() {
           <Text style={styles.continueText}>
             {selectedMood ? `talk about feeling ${selectedMood}` : 'continue with whisper'}
           </Text>
-          <Ionicons name="arrow-forward-outline" size={16} color={Colors.white} />
+          <Ionicons name="arrow-forward-outline" size={18} color={Colors.white} />
         </TouchableOpacity>
 
         {/* Bottom padding to offset the floating tab bar */}
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 120,
+    paddingBottom: 40, // Reduced to rely on bottomSpacer
   },
   continueButton: {
     flexDirection: 'row',
@@ -124,8 +124,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: Colors.green.secondary,
     marginHorizontal: Spacing.lg,
-    marginTop: Spacing.md,
-    paddingVertical: 16,
+    marginTop: Spacing.xl, // Increased margin to match the airy mockup
+    paddingVertical: 18, // Taller button for more premium feel
     borderRadius: Radius.md,
     ...Shadows.md,
   },
@@ -133,12 +133,14 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.green.primary,
   },
   continueText: {
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 15,
+    fontFamily: 'Inter_700Bold', // Bolder to match the action focus
+    fontSize: 16,
     color: Colors.white,
-    marginRight: Spacing.xs,
+    marginRight: Spacing.sm,
+    letterSpacing: -0.2,
   },
   bottomSpacer: {
-    height: 100,
+    height: 140, // Significant spacer so the floating tab bar never covers the button
   },
 });
+

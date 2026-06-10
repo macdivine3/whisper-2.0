@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     textTransform: 'none',
   },
   bubble: {
-    backgroundColor: Colors.bg.secondary,
+    backgroundColor: Colors.green.faint,
     borderRadius: Radius.sm,
     borderLeftWidth: 2,
     borderLeftColor: Colors.green.primary,
