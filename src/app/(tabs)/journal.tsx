@@ -9,14 +9,9 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
-import {
-  Colors,
-  Radius,
-  Shadows,
-  Spacing
-} from "../../constants/theme";
+import { Colors, Radius, Shadows, Spacing } from "../../constants/theme";
 
 const { width } = Dimensions.get("window");
 
@@ -109,10 +104,15 @@ export default function JournalScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Featured Prompt Card (soft horizontal) */}
+        {/* Featured Prompt Card (soft horizontal) with vertical background image */}
         <View style={styles.featuredSmallWrap}>
           <View style={styles.featuredSmall}>
-            <View style={{ flex: 1 }}>
+            <Image
+              source={BOOK_LEAF_IMAGE}
+              style={styles.featuredBgImage}
+              resizeMode="cover"
+            />
+            <View style={{ flex: 1, zIndex: 2 }}>
               <Text style={styles.featuredSmallLabel}>TODAY'S REFLECTION</Text>
               <Text style={styles.featuredSmallTitle}>
                 What's something you're learning to surrender into God's hands?
@@ -123,11 +123,6 @@ export default function JournalScreen() {
                 </Text>
               </TouchableOpacity>
             </View>
-            <Image
-              source={BOOK_LEAF_IMAGE}
-              style={styles.featuredSmallImage}
-              resizeMode="contain"
-            />
           </View>
         </View>
 
@@ -366,6 +361,16 @@ const styles = StyleSheet.create({
     height: 88,
     marginLeft: Spacing.md,
     borderRadius: Radius.md,
+  },
+  featuredBgImage: {
+    position: "absolute",
+    right: -40,
+    top: -10,
+    width: 220,
+    height: 220,
+    opacity: 0.98,
+    transform: [{ rotate: "90deg" }],
+    borderRadius: Radius.lg,
   },
   sectionHeader: {
     flexDirection: "row",
