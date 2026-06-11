@@ -133,9 +133,10 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.bg.card,
     borderRadius: 16,
-    padding: 16, // Shrink padding
+    padding: 16,
     marginHorizontal: Spacing.lg,
-    marginVertical: Spacing.xxs, // Shrink vertical margin
+    marginTop: Spacing.xs,
+    marginBottom: 16, // Increased gap between whisper card and story card
     borderWidth: 1,
     borderColor: Colors.border.default,
     position: 'relative',
@@ -209,7 +210,7 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0, 0, 0, 0.4)' },
-  modalBackdrop: { ...StyleSheet.absoluteFillObject },
+  modalBackdrop: { ...StyleSheet.absoluteFill },
   modalContent: { backgroundColor: Colors.bg.primary, borderTopLeftRadius: Radius.xl, borderTopRightRadius: Radius.xl, padding: Spacing.lg, paddingBottom: Spacing.xxl, minHeight: SCREEN_HEIGHT * 0.5 },
   modalHandle: { width: 40, height: 4, backgroundColor: Colors.border.default, borderRadius: Radius.pill, alignSelf: 'center', marginBottom: Spacing.lg },
   modalTitle: { fontFamily: 'NotoSerif_700Bold', fontSize: 24, color: Colors.text.primary, marginBottom: 8 },

@@ -1,7 +1,6 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Radius, Spacing, Shadows } from '../constants/theme';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Colors, Radius, Shadows, Spacing } from '../constants/theme';
 
 const LOGO_IMAGE = require('../../assets/images/whisper logo-Photoroom.png');
 
@@ -52,7 +51,11 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   logoImage: {
-    width: 120,
+    // EDIT LOGO SIZE AND POSITION HERE:
+    // Change scale (e.g., 1.2 is 20% bigger, 0.9 is smaller)
+    // Change translateX (e.g., -10 moves it left, 10 moves it right)
+    transform: [{ scale: 1.1 }, { translateX: -10 }],
+    width: 150,
     height: 36,
   },
   tagline: {

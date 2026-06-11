@@ -123,6 +123,7 @@ const styles = StyleSheet.create({
   },
   cardStack: {
     marginTop: -10, // Pull everything up closer to the greeting
+    zIndex: 10,     // Ensure cards sit on top of any background graphics (like the sun)
   },
   continueButton: {
     flexDirection: 'row',
@@ -132,7 +133,7 @@ const styles = StyleSheet.create({
     marginHorizontal: Spacing.lg,
     marginTop: Spacing.md, // Reduced margin
     paddingVertical: 18,
-    borderRadius: Radius.md,
+    borderRadius: Radius.pill, // Gives cylindrical/rounded edges
     ...Shadows.md,
   },
   continueButtonActive: {

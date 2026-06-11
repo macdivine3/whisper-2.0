@@ -1,5 +1,4 @@
 import { Image, StyleSheet, Text, View } from 'react-native';
-import Svg, { Defs, LinearGradient, Path, Stop } from 'react-native-svg';
 import { Colors, Spacing } from '../constants/theme';
 
 const SUN_IMAGE = require('../../assets/images/sun-glow.png');
@@ -28,30 +27,6 @@ export default function HeroGreeting({
           style={styles.sunImage}
           resizeMode="contain"
         />
-
-        <Svg width={160} height={140} viewBox="0 0 160 140" style={styles.svg}>
-          <Defs>
-            <LinearGradient id="cloudGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <Stop offset="0%" stopColor="#F5EDDF" stopOpacity="0.95" />
-              <Stop offset="100%" stopColor="#F0E3D3" stopOpacity="0.6" />
-            </LinearGradient>
-          </Defs>
-
-          <Path d="M 125 30 Q 128 26 131 30 Q 134 26 137 30" fill="none" stroke={Colors.text.muted} strokeWidth="1.2" strokeLinecap="round" opacity={0.6} />
-          <Path d="M 135 42 Q 137 39 139 42 Q 141 39 143 42" fill="none" stroke={Colors.text.muted} strokeWidth="1.0" strokeLinecap="round" opacity={0.5} />
-
-          <Path
-            d="M 10 120 Q 40 90 70 110 Q 100 80 135 110 Q 155 95 175 120 L 175 140 L 10 140 Z"
-            fill="url(#cloudGrad)"
-            opacity="0.8"
-          />
-
-          <Path
-            d="M 30 130 Q 70 100 110 120 Q 140 95 175 130 L 175 140 L 30 140 Z"
-            fill={Colors.bg.primary}
-            opacity="1.0"
-          />
-        </Svg>
       </View>
     </View>
   );
@@ -75,9 +50,9 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontFamily: 'NotoSerif_400Regular', // Normal weight
-    fontSize: 26,
+    fontSize: 22, // Reduced font size
     color: '#333333', // Charcoal
-    lineHeight: 32,
+    lineHeight: 28, // Adjusted line height
   },
   subtitle: {
     fontFamily: 'Inter_500Medium',
@@ -91,17 +66,29 @@ const styles = StyleSheet.create({
     top: 0,
     width: 160,
     height: 140,
-    zIndex: 1,
+    zIndex: -1, // Put it behind the text and cards
   },
   // EDIT THE SUN POSITION AND SIZE HERE
   sunImage: {
     position: 'absolute',
-    top: 8,
-    right: 4,
-    width: 60,
-    height: 60,
-  },
-  svg: {
-    overflow: 'visible',
+
+    // --- 1. MOVE IT ---
+    // Decrease 'top' (e.g., -10) to move UP. Increase (e.g., 20) to move DOWN.
+    top: 35,
+    // Decrease 'right' (e.g., 20) to move RIGHT. Increase (e.g., 60) to move LEFT.
+    right: 0.7,
+
+    // --- 2. BASE SIZE --- (Best to leave these alone to keep the ratio)
+    width: 200,
+    height: 120,
+
+    // --- 3. MAKE IT BIGGER/SMALLER ---
+    // Change this number to resize WITHOUT moving it! 
+    // Example: 1.5 is 50% bigger, 0.8 is smaller, 2.0 is double size.
+    transform: [{ scale: 3.5 }],
+
+    // --- 4. TRANSPARENCY (OPACITY) ---
+    // 1.0 is fully solid, 0.5 is half see-through, 0.0 is invisible
+    opacity: 0.7,
   },
 });

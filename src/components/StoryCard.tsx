@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from 'react
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Radius, Spacing, Shadows } from '../constants/theme';
 
-const WATERCOLOR_BG = require('../../svjs/story card.jpg');
+const STORY_BG = require('../../assets/images/story-bg.png');
 
 interface StoryCardProps {
   title?: string;
@@ -27,7 +27,7 @@ export default function StoryCard({
       activeOpacity={0.9}
     >
       <ImageBackground
-        source={WATERCOLOR_BG}
+        source={STORY_BG}
         style={styles.card}
         imageStyle={styles.cardImage}
         resizeMode="cover"
@@ -77,7 +77,9 @@ export default function StoryCard({
 const styles = StyleSheet.create({
   touchable: {
     marginHorizontal: Spacing.lg,
-    marginVertical: Spacing.xxs, // Shrink spacing
+    marginTop: Spacing.xs,
+    marginBottom: 32, // Breathing space before "how are you feeling"
+
     borderRadius: 16,
     overflow: 'hidden',
     ...Shadows.md,
@@ -89,6 +91,7 @@ const styles = StyleSheet.create({
   },
   cardImage: {
     borderRadius: 16,
+    opacity: 0.8, // Added opacity to the background image
   },
   overlay: {
     ...StyleSheet.absoluteFill,
