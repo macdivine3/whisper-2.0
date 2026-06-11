@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
   Platform,
+  ScrollView,
   StatusBar,
+  StyleSheet,
+  Text,
   TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import * as Haptics from 'expo-haptics';
-import { Colors, Spacing, Radius, Shadows, CommonStyles } from '../../constants/theme';
+import { Colors, CommonStyles, Radius, Shadows, Spacing } from '../../constants/theme';
 
 interface PrayerItem {
   id: string;
@@ -85,8 +85,8 @@ export default function PrayersScreen() {
     setNewPrayer('');
   };
 
-  const filteredPrayers = activeCategory === 'all' 
-    ? prayers 
+  const filteredPrayers = activeCategory === 'all'
+    ? prayers
     : prayers.filter(p => p.category === activeCategory);
 
   return (
@@ -137,11 +137,11 @@ export default function PrayersScreen() {
           />
           <View style={styles.inputFooter}>
             <Text style={styles.charCount}>{newPrayer.length}/200</Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[
                 styles.submitBtn,
                 { backgroundColor: newPrayer.trim() ? Colors.green.primary : Colors.green.muted }
-              ]} 
+              ]}
               onPress={handleAddPrayer}
               disabled={!newPrayer.trim()}
               activeOpacity={0.8}
@@ -169,7 +169,7 @@ export default function PrayersScreen() {
         {/* Prayer List */}
         <View style={styles.prayerList}>
           <Text style={styles.sectionTitle}>COMMUNITY PETITIONS</Text>
-          
+
           {filteredPrayers.map((item) => (
             <View key={item.id} style={styles.prayerCard}>
               <View style={styles.cardHeader}>

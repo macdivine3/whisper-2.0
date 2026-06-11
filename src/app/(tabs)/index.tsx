@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Ionicons, Feather } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Colors, Spacing, Radius, Shadows } from '../../constants/theme';
 
@@ -65,23 +65,26 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Greeting Section */}
-        <HeroGreeting name="David" />
+        <HeroGreeting name="Mac Divine" />
 
-        {/* Morning Whisper Card */}
-        <WhisperCard
-          type="morning"
-          title={dailyMorningWhisper.title}
-          verse={dailyMorningWhisper.verse}
-          reference={dailyMorningWhisper.reference}
-          reflection={dailyMorningWhisper.reflection}
-        />
+        {/* Pulling cards up by using very small vertical margins/spacing */}
+        <View style={styles.cardStack}>
+          {/* Morning Whisper Card */}
+          <WhisperCard
+            type="morning"
+            title={dailyMorningWhisper.title}
+            verse={dailyMorningWhisper.verse}
+            reference={dailyMorningWhisper.reference}
+            reflection={dailyMorningWhisper.reflection}
+          />
 
-        {/* Story Card */}
-        <StoryCard
-          title={dailyStory.title}
-          excerpt={dailyStory.deepComment}
-          onPress={() => router.push('/journal')}
-        />
+          {/* Story Card */}
+          <StoryCard
+            title={dailyStory.title}
+            excerpt={dailyStory.deepComment}
+            onPress={() => router.push('/journal')}
+          />
+        </View>
 
         {/* Mood Selector Grid */}
         <MoodGrid
@@ -98,7 +101,7 @@ export default function HomeScreen() {
           <Text style={styles.continueText}>
             {selectedMood ? `talk about feeling ${selectedMood}` : 'continue with whisper'}
           </Text>
-          <Feather name="arrow-right" size={20} color={Colors.white} />
+          <Ionicons name="arrow-forward-outline" size={18} color={Colors.white} />
         </TouchableOpacity>
 
         {/* Bottom padding to offset the floating tab bar */}
@@ -116,7 +119,10 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 40,
+    paddingBottom: 20,
+  },
+  cardStack: {
+    marginTop: -10, // Pull everything up closer to the greeting
   },
   continueButton: {
     flexDirection: 'row',
@@ -124,22 +130,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: Colors.green.secondary,
     marginHorizontal: Spacing.lg,
-    marginTop: Spacing.xl,
+    marginTop: Spacing.md, // Reduced margin
     paddingVertical: 18,
-    borderRadius: 99,
-    gap: 10,
+    borderRadius: Radius.md,
     ...Shadows.md,
   },
   continueButtonActive: {
     backgroundColor: Colors.green.primary,
   },
   continueText: {
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'Inter_700Bold',
     fontSize: 16,
     color: Colors.white,
-    fontWeight: '600',
+    marginRight: Spacing.sm,
+    letterSpacing: -0.2,
   },
   bottomSpacer: {
-    height: 140,
+    height: 120, // Slightly smaller spacer
   },
 });

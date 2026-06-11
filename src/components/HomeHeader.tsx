@@ -1,7 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Radius, Spacing, Shadows } from '../constants/theme';
+
+const LOGO_IMAGE = require('../../assets/images/whisper logo-Photoroom.png');
 
 interface HomeHeaderProps {
   onFollowUpPress?: () => void;
@@ -16,12 +18,9 @@ export default function HomeHeader({
 }: HomeHeaderProps) {
   return (
     <View style={styles.header}>
-      {/* Left: Logo + Tagline */}
+      {/* Left: Logo Image + Tagline */}
       <View style={styles.logoBlock}>
-        <View style={styles.logoRow}>
-          <Text style={styles.logo}>whisper.</Text>
-          <Ionicons name="leaf" size={12} color={Colors.green.primary} style={styles.logoLeaf} />
-        </View>
+        <Image source={LOGO_IMAGE} style={styles.logoImage} resizeMode="contain" />
         <Text style={styles.tagline}>your safe sanctuary</Text>
       </View>
 
@@ -52,28 +51,16 @@ const styles = StyleSheet.create({
   logoBlock: {
     flexDirection: 'column',
   },
-  logoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  logo: {
-    fontFamily: 'NotoSerif_700Bold',
-    fontSize: 28,
-    color: Colors.green.primary,
-    letterSpacing: -0.8,
-    lineHeight: 34,
-  },
-  logoLeaf: {
-    marginLeft: 3,
-    marginBottom: 4,
+  logoImage: {
+    width: 120,
+    height: 36,
   },
   tagline: {
     fontFamily: 'Inter_500Medium',
     fontSize: 10,
     color: Colors.text.muted,
-    marginTop: -2,
-    letterSpacing: 0.2,
-    textTransform: 'lowercase',
+    marginTop: -4,
+    fontStyle: 'italic',
   },
   rightRow: {
     flexDirection: 'row',

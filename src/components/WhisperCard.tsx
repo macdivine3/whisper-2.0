@@ -59,7 +59,7 @@ export default function WhisperCard({
   return (
     <>
       <View style={styles.card}>
-        {/* Leaf Branch Watermark — increased, slanting, stem from bottom */}
+        {/* Leaf stays exactly as it was */}
         <View style={styles.watermarkContainer}>
           <Image
             source={LEAF_BG}
@@ -68,13 +68,13 @@ export default function WhisperCard({
           />
         </View>
 
-        {/* Top Row: tag + heart (full width) */}
+        {/* Top Row */}
         <View style={styles.topRow}>
           <View style={styles.tagContainer}>
             <Text style={styles.tagText}>{type} whisper</Text>
             <Ionicons
               name={type === 'morning' ? 'leaf' : 'moon'}
-              size={13}
+              size={12}
               color={Colors.green.primary}
               style={styles.tagIcon}
             />
@@ -82,81 +82,45 @@ export default function WhisperCard({
           <TouchableOpacity onPress={() => setIsLoved(!isLoved)} activeOpacity={0.6}>
             <Ionicons
               name={isLoved ? 'heart' : 'heart-outline'}
-              size={20}
+              size={18}
               color={isLoved ? '#E07B7B' : Colors.text.muted}
             />
           </TouchableOpacity>
         </View>
 
-        {/* Text Content constrained to the left side */}
+        {/* Text Content - Title straight line, Verse on left */}
         <View style={styles.textContent}>
-          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.title} numberOfLines={1}>{title}</Text>
 
-          <Text style={styles.verse}>
-            {verse}
-            {reference ? <Text style={styles.reference}> {reference}.</Text> : null}
-          </Text>
+          <View style={styles.verseWrapper}>
+            <Text style={styles.verse}>
+              {verse}
+              {reference ? <Text style={styles.reference}> {reference}.</Text> : null}
+            </Text>
+          </View>
 
           {/* Read link */}
           <TouchableOpacity style={styles.actionRow} onPress={handleReadPress} activeOpacity={0.6}>
             <Text style={styles.actionText}>read whisper</Text>
-            <Ionicons name="arrow-forward-outline" size={14} color={Colors.green.primary} />
+            <Ionicons name="arrow-forward-outline" size={13} color={Colors.green.primary} />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Bottom Sheet Modal for Full Whisper */}
-      <Modal
-        visible={modalVisible}
-        transparent={true}
-        animationType="none"
-        onRequestClose={closeModal}
-      >
+      {/* Modal remains the same */}
+      <Modal visible={modalVisible} transparent={true} animationType="none" onRequestClose={closeModal}>
         <View style={styles.modalOverlay}>
-          {/* Backdrop (closes modal on press) */}
-          <TouchableOpacity
-            style={styles.modalBackdrop}
-            activeOpacity={1}
-            onPress={closeModal}
-          />
-
-          {/* Bottom Sheet - Now wrapped in Animated.View */}
+          <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={closeModal} />
           <Animated.View style={[styles.modalContent, { transform: [{ translateY: slideAnim }] }]}>
             <View style={styles.modalHandle} />
-
-            <View style={styles.modalHeader}>
-              <View style={styles.tagContainer}>
-                <Text style={styles.tagText}>{type} whisper</Text>
-                <Ionicons name={type === 'morning' ? 'leaf' : 'moon'} size={13} color={Colors.green.primary} style={styles.tagIcon} />
-              </View>
-            </View>
-
             <Text style={styles.modalTitle}>{title}</Text>
             <Text style={styles.modalVerse}>"{verse}" — {reference}</Text>
-
-            {/* The full whisper reflection */}
-            <View style={styles.reflectionBox}>
-              <Text style={styles.modalReflection}>{reflection}</Text>
-            </View>
-
-            {/* Actions (Like & Share) */}
+            <View style={styles.reflectionBox}><Text style={styles.modalReflection}>{reflection}</Text></View>
             <View style={styles.modalActions}>
-              <TouchableOpacity
-                style={styles.modalLikeBtn}
-                onPress={() => setIsLoved(!isLoved)}
-                activeOpacity={0.7}
-              >
-                <Ionicons
-                  name={isLoved ? 'heart' : 'heart-outline'}
-                  size={24}
-                  color={isLoved ? '#E07B7B' : Colors.text.primary}
-                />
+              <TouchableOpacity style={styles.modalLikeBtn} onPress={() => setIsLoved(!isLoved)}>
+                <Ionicons name={isLoved ? 'heart' : 'heart-outline'} size={24} color={isLoved ? '#E07B7B' : Colors.text.primary} />
               </TouchableOpacity>
-
-              <TouchableOpacity style={styles.modalShareBtn} activeOpacity={0.8}>
-                <Text style={styles.modalShareText}>share whisper</Text>
-                <Ionicons name="share-social-outline" size={16} color={Colors.white} />
-              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalShareBtn}><Text style={styles.modalShareText}>share whisper</Text></TouchableOpacity>
             </View>
           </Animated.View>
         </View>
@@ -168,10 +132,10 @@ export default function WhisperCard({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.bg.card,
-    borderRadius: Radius.lg,
-    padding: 18,
+    borderRadius: 16,
+    padding: 16, // Shrink padding
     marginHorizontal: Spacing.lg,
-    marginVertical: Spacing.xs,
+    marginVertical: Spacing.xxs, // Shrink vertical margin
     borderWidth: 1,
     borderColor: Colors.border.default,
     position: 'relative',
@@ -194,7 +158,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.sm,
+    marginBottom: 8,
     zIndex: 1,
   },
   tagContainer: {
@@ -203,32 +167,34 @@ const styles = StyleSheet.create({
   },
   tagText: {
     fontFamily: 'Inter_600SemiBold',
-    fontSize: 12,
+    fontSize: 11, // Shrink font
     color: Colors.green.primary,
   },
   tagIcon: {
-    marginLeft: 5,
+    marginLeft: 4,
   },
   textContent: {
-    width: '72%',
     zIndex: 1,
   },
   title: {
     fontFamily: 'NotoSerif_700Bold',
-    fontSize: 24,
+    fontSize: 20, // Shrink font
     color: Colors.text.primary,
-    marginBottom: Spacing.xs,
+    marginBottom: 4,
+  },
+  verseWrapper: {
+    width: '68%', // Force verse to left side
   },
   verse: {
     fontFamily: 'NotoSerif_400Regular_Italic',
-    fontSize: 14,
+    fontSize: 13, // Shrink font
     color: Colors.text.secondary,
-    lineHeight: 21,
-    marginBottom: Spacing.md,
+    lineHeight: 18,
+    marginBottom: 8,
   },
   reference: {
     fontFamily: 'NotoSerif_400Regular_Italic',
-    fontSize: 13,
+    fontSize: 12,
     color: Colors.text.muted,
   },
   actionRow: {
@@ -238,95 +204,20 @@ const styles = StyleSheet.create({
   },
   actionText: {
     fontFamily: 'Inter_600SemiBold',
-    fontSize: 13,
+    fontSize: 12,
     color: Colors.green.primary,
     marginRight: 4,
   },
-
-  // Modal Styles
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-  },
-  modalBackdrop: {
-    ...StyleSheet.absoluteFill,
-  },
-  modalContent: {
-    backgroundColor: Colors.bg.primary,
-    borderTopLeftRadius: Radius.xl,
-    borderTopRightRadius: Radius.xl,
-    padding: Spacing.lg,
-    paddingBottom: Spacing.xxl,
-    minHeight: SCREEN_HEIGHT * 0.5,
-    ...Shadows.md,
-  },
-  modalHandle: {
-    width: 40,
-    height: 4,
-    backgroundColor: Colors.border.default,
-    borderRadius: Radius.pill,
-    alignSelf: 'center',
-    marginBottom: Spacing.lg,
-  },
-  modalHeader: {
-    marginBottom: Spacing.md,
-  },
-  modalTitle: {
-    fontFamily: 'NotoSerif_700Bold',
-    fontSize: 28,
-    color: Colors.text.primary,
-    marginBottom: Spacing.xs,
-  },
-  modalVerse: {
-    fontFamily: 'NotoSerif_400Regular_Italic',
-    fontSize: 15,
-    color: Colors.text.muted,
-    marginBottom: Spacing.lg,
-  },
-  reflectionBox: {
-    backgroundColor: Colors.bg.card,
-    padding: Spacing.lg,
-    borderRadius: Radius.md,
-    borderWidth: 1,
-    borderColor: Colors.border.soft,
-    marginBottom: Spacing.xl,
-  },
-  modalReflection: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 15,
-    color: Colors.text.secondary,
-    lineHeight: 24,
-  },
-  modalActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  modalLikeBtn: {
-    width: 54,
-    height: 54,
-    borderRadius: Radius.circle,
-    backgroundColor: Colors.bg.card,
-    borderWidth: 1,
-    borderColor: Colors.border.soft,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalShareBtn: {
-    flex: 1,
-    marginLeft: Spacing.md,
-    height: 54,
-    backgroundColor: Colors.green.primary,
-    borderRadius: Radius.pill,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
-  },
-  modalShareText: {
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 15,
-    color: Colors.white,
-  },
+  modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0, 0, 0, 0.4)' },
+  modalBackdrop: { ...StyleSheet.absoluteFillObject },
+  modalContent: { backgroundColor: Colors.bg.primary, borderTopLeftRadius: Radius.xl, borderTopRightRadius: Radius.xl, padding: Spacing.lg, paddingBottom: Spacing.xxl, minHeight: SCREEN_HEIGHT * 0.5 },
+  modalHandle: { width: 40, height: 4, backgroundColor: Colors.border.default, borderRadius: Radius.pill, alignSelf: 'center', marginBottom: Spacing.lg },
+  modalTitle: { fontFamily: 'NotoSerif_700Bold', fontSize: 24, color: Colors.text.primary, marginBottom: 8 },
+  modalVerse: { fontFamily: 'NotoSerif_400Regular_Italic', fontSize: 14, color: Colors.text.muted, marginBottom: 16 },
+  reflectionBox: { backgroundColor: Colors.bg.card, padding: 16, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.border.soft, marginBottom: 20 },
+  modalReflection: { fontFamily: 'Inter_400Regular', fontSize: 14, color: Colors.text.secondary, lineHeight: 22 },
+  modalActions: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  modalLikeBtn: { width: 50, height: 50, borderRadius: 25, backgroundColor: Colors.bg.card, borderWidth: 1, borderColor: Colors.border.soft, justifyContent: 'center', alignItems: 'center' },
+  modalShareBtn: { flex: 1, height: 50, backgroundColor: Colors.green.primary, borderRadius: Radius.pill, justifyContent: 'center', alignItems: 'center' },
+  modalShareText: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: Colors.white },
 });
