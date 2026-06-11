@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontFamily: 'Inter_500Medium',
-    fontSize: 11,
+    fontSize: 10,
     color: Colors.text.secondary,
     textTransform: 'lowercase',
   },

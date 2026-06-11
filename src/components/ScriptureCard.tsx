@@ -95,8 +95,8 @@ const styles = StyleSheet.create({
   },
   card: {
     borderRadius: Radius.md,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.lg,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderWidth: 1,
     borderColor: Colors.border.soft,
     position: 'relative',
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.xs,
   },
   scriptureTag: {
     flexDirection: 'row',
@@ -126,28 +126,28 @@ const styles = StyleSheet.create({
   },
   scriptureTagText: {
     fontFamily: 'Inter_700Bold',
-    fontSize: 9,
+    fontSize: 8.5,
     letterSpacing: 1.2,
     color: Colors.mood.hopeful,
   },
   referenceText: {
     fontFamily: 'Inter_600SemiBold',
-    fontSize: 11,
+    fontSize: 10,
     color: Colors.text.muted,
   },
   verseText: {
     fontFamily: 'NotoSerif_400Regular_Italic',
-    fontSize: 15,
+    fontSize: 14,
     color: Colors.text.primary,
-    lineHeight: 22,
-    marginBottom: Spacing.md,
+    lineHeight: 20,
+    marginBottom: 12,
   },
   actionRow: {
     flexDirection: 'row',
     gap: Spacing.md,
     borderTopWidth: 1,
     borderTopColor: Colors.border.soft,
-    paddingTop: Spacing.sm,
+    paddingTop: Spacing.xs,
   },
   actionBtn: {
     flexDirection: 'row',
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
   },
   actionLabel: {
     fontFamily: 'Inter_500Medium',
-    fontSize: 11,
+    fontSize: 10,
     color: Colors.text.muted,
     marginLeft: 4,
   },

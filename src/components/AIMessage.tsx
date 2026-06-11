@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
   },
   senderText: {
     fontFamily: 'Inter_700Bold',
-    fontSize: 10,
+    fontSize: 9,
     color: Colors.text.primary,
     letterSpacing: 0.8,
     textTransform: 'lowercase',
@@ -95,14 +95,14 @@ const styles = StyleSheet.create({
   },
   timeText: {
     fontFamily: 'Inter_400Regular',
-    fontSize: 10,
+    fontSize: 9,
     color: Colors.text.muted,
   },
   messageText: {
     fontFamily: 'NotoSerif_400Regular',
-    fontSize: 16,
+    fontSize: 14.5,
     color: Colors.text.primary,
-    lineHeight: 25,
+    lineHeight: 22,
   },
 });
 

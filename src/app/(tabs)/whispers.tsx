@@ -256,12 +256,12 @@ const styles = StyleSheet.create({
   },
   logo: {
     fontFamily: 'NotoSerif_700Bold',
-    fontSize: 20,
+    fontSize: 18,
     color: Colors.green.primary,
   },
   tagline: {
     fontFamily: 'Inter_500Medium',
-    fontSize: 9,
+    fontSize: 8,
     color: Colors.text.muted,
     marginTop: -2,
     letterSpacing: 0.1,
@@ -275,13 +275,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.bg.secondary,
     borderRadius: Radius.pill,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
     marginRight: Spacing.xs,
   },
   whatIsText: {
     fontFamily: 'Inter_600SemiBold',
-    fontSize: 10,
+    fontSize: 9,
     color: Colors.text.secondary,
     marginRight: 4,
   },
@@ -295,22 +295,22 @@ const styles = StyleSheet.create({
   },
   dateSeparatorContainer: {
     alignItems: 'center',
-    marginVertical: Spacing.md,
+    marginVertical: Spacing.sm,
   },
   dateSeparatorPill: {
     backgroundColor: Colors.bg.secondary,
     borderRadius: Radius.pill,
     paddingHorizontal: Spacing.md,
-    paddingVertical: 4,
+    paddingVertical: 3,
   },
   dateSeparatorText: {
     fontFamily: 'Inter_500Medium',
-    fontSize: 10,
+    fontSize: 9,
     color: Colors.text.muted,
   },
   footer: {
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.sm,
+    paddingTop: Spacing.xs,
     paddingBottom: Platform.OS === 'ios' ? 24 : 16, // Reduced since tab bar is hidden
     backgroundColor: Colors.bg.primary,
   },
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border.soft,
     paddingHorizontal: Spacing.sm,
-    paddingVertical: 8,
+    paddingVertical: 6,
     ...Shadows.float, // Outward feeling shadow
   },
   inputLeaf: {
@@ -332,9 +332,9 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     fontFamily: 'Inter_400Regular',
-    fontSize: 14,
+    fontSize: 13,
     color: Colors.text.primary,
-    paddingVertical: 6,
+    paddingVertical: 4,
   },
   sendButton: {
     width: 32,

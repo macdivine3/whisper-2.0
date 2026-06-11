@@ -47,16 +47,16 @@ const styles = StyleSheet.create({
   },
   senderHeader: {
     fontFamily: 'Inter_700Bold',
-    fontSize: 10,
+    fontSize: 9,
     color: Colors.text.secondary,
     letterSpacing: 0.8,
-    marginBottom: 6,
+    marginBottom: 4,
     textTransform: 'uppercase',
   },
   timeText: {
     fontFamily: 'Inter_400Regular',
     color: Colors.text.muted,
-    fontSize: 10,
+    fontSize: 9,
     textTransform: 'none',
   },
   bubble: {
@@ -64,16 +64,16 @@ const styles = StyleSheet.create({
     borderRadius: Radius.sm,
     borderLeftWidth: 2,
     borderLeftColor: Colors.green.primary,
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: 12,
     ...Shadows.sm,
     position: 'relative',
   },
   messageText: {
     fontFamily: 'NotoSerif_400Regular',
-    fontSize: 15,
+    fontSize: 14,
     color: Colors.text.primary,
-    lineHeight: 22,
+    lineHeight: 20,
     paddingBottom: Spacing.xs,
   },
   statusRow: {
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
   },
   seenText: {
     fontFamily: 'Inter_500Medium',
-    fontSize: 9,
+    fontSize: 8.5,
     color: Colors.text.muted,
   },
 });

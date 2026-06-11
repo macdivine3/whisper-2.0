@@ -71,8 +71,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   dot: {
-    width: 7,
-    height: 7,
+    width: 6,
+    height: 6,
     borderRadius: 99,
     backgroundColor: Colors.green.muted,
   },
