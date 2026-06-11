@@ -1,5 +1,5 @@
 import { Tabs, useSegments } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { View, StyleSheet, Platform } from 'react-native';
 import { Colors, Radius, Shadows, Spacing } from '../../constants/theme';
 
@@ -15,7 +15,7 @@ export default function TabLayout() {
         headerShown: false,
         tabBarStyle: isWhisperChat ? { display: 'none' } : styles.tabBar,
         tabBarShowLabel: true,
-        tabBarActiveTintColor: Colors.green.primary,
+        tabBarActiveTintColor: Colors.green.secondary,
         tabBarInactiveTintColor: Colors.text.muted,
         tabBarLabelStyle: styles.tabBarLabel,
       }}>
@@ -24,8 +24,8 @@ export default function TabLayout() {
         options={{
           title: 'home',
           tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? styles.activeIconContainer : styles.iconContainer}>
-              <Ionicons name="home" size={20} color={focused ? Colors.white : color} />
+            <View style={[styles.iconContainer, focused && styles.activeIconContainer]}>
+              <Feather name="home" size={20} color={focused ? Colors.white : color} />
             </View>
           ),
         }}
@@ -35,8 +35,8 @@ export default function TabLayout() {
         options={{
           title: 'whispers',
           tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? styles.activeIconContainer : styles.iconContainer}>
-              <Ionicons name="chatbubble-outline" size={20} color={focused ? Colors.white : color} />
+            <View style={[styles.iconContainer, focused && styles.activeIconContainer]}>
+              <Feather name="message-circle" size={20} color={focused ? Colors.white : color} />
             </View>
           ),
         }}
@@ -46,8 +46,8 @@ export default function TabLayout() {
         options={{
           title: 'journal',
           tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? styles.activeIconContainer : styles.iconContainer}>
-              <Ionicons name="book-outline" size={20} color={focused ? Colors.white : color} />
+            <View style={[styles.iconContainer, focused && styles.activeIconContainer]}>
+              <Feather name="book-open" size={20} color={focused ? Colors.white : color} />
             </View>
           ),
         }}
@@ -57,8 +57,8 @@ export default function TabLayout() {
         options={{
           title: 'prayers',
           tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? styles.activeIconContainer : styles.iconContainer}>
-              <Ionicons name="heart-outline" size={20} color={focused ? Colors.white : color} />
+            <View style={[styles.iconContainer, focused && styles.activeIconContainer]}>
+              <Feather name="heart" size={20} color={focused ? Colors.white : color} />
             </View>
           ),
         }}
@@ -68,8 +68,8 @@ export default function TabLayout() {
         options={{
           title: 'profile',
           tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? styles.activeIconContainer : styles.iconContainer}>
-              <Ionicons name="person-outline" size={20} color={focused ? Colors.white : color} />
+            <View style={[styles.iconContainer, focused && styles.activeIconContainer]}>
+              <Feather name="user" size={20} color={focused ? Colors.white : color} />
             </View>
           ),
         }}
@@ -80,40 +80,36 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)', // Slight transparency for a glass look
+    backgroundColor: Colors.bg.card,
     position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 34 : 20, // Raised higher to match the floating style
+    bottom: Platform.OS === 'ios' ? 34 : 20,
     left: 20,
     right: 20,
     borderRadius: Radius.pill,
     height: 72,
     borderTopWidth: 0,
-    ...Shadows.float, // Stronger shadow to make it "float"
+    ...Shadows.float,
     paddingBottom: Platform.OS === 'ios' ? 0 : 4,
     paddingTop: 0,
     elevation: 10,
+    borderWidth: 1,
+    borderColor: Colors.border.default,
   },
   tabBarLabel: {
     fontFamily: 'Inter_600SemiBold',
-    fontSize: 9,
+    fontSize: 10,
     marginTop: -4,
-    letterSpacing: 0.1,
   },
   iconContainer: {
-    width: 42,
-    height: 42,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 8,
+    borderRadius: 14,
   },
   activeIconContainer: {
-    width: 42,
-    height: 42,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: Colors.green.primary,
-    borderRadius: Radius.circle,
-    marginTop: 8,
+    backgroundColor: Colors.green.secondary,
     ...Shadows.sm,
   },
 });

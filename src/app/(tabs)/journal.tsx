@@ -3,7 +3,6 @@ import { useState } from "react";
 import {
   Dimensions,
   Image,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -11,14 +10,24 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors, Radius, Shadows, Spacing } from "../../constants/theme";
 
 const { width } = Dimensions.get("window");
 
 // Assets
-const CANDLE_IMAGE = require("../../../svjs/candle.jpg");
-const BOOK_LEAF_IMAGE = require("../../../svjs/book + leaf.jpg");
-const LEAF_BG = require("../../../assets/images/leaf-transparent.png");
+const BOOK_LEAF_IMAGE = require("../../../svjs/book_leaf.jpg");
+
+// Mood Icons from SVJS
+const MOOD_ICONS = {
+  grateful: require("../../../svjs/grateful.jpg"),
+  peaceful: require("../../../svjs/peaceful.jpg"),
+  anxious: require("../../../svjs/anxious.jpg"),
+  drained: require("../../../svjs/drained.jpg"),
+  overwhelmed: require("../../../svjs/overwhelmed.jpg"),
+  unsure: require("../../../svjs/unsure.jpg"),
+  hopeful: require("../../../svjs/grateful.jpg"), // Fallback
+};
 
 interface JournalEntry {
   id: string;
@@ -72,19 +81,18 @@ export default function JournalScreen() {
         <View style={styles.headerRow}>
           <View>
             <Text style={styles.logo}>journal</Text>
-            <Text style={styles.tagline}>a space for your heart</Text>
           </View>
 
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.iconBtn}>
               <Ionicons
                 name="search-outline"
-                size={18}
+                size={20}
                 color={Colors.text.primary}
               />
             </TouchableOpacity>
             <TouchableOpacity style={styles.addBtn}>
-              <Ionicons name="add" size={20} color={Colors.white} />
+              <Ionicons name="add" size={24} color={Colors.white} />
             </TouchableOpacity>
           </View>
         </View>
@@ -104,25 +112,23 @@ export default function JournalScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Featured Prompt Card (soft horizontal) with vertical background image */}
-        <View style={styles.featuredSmallWrap}>
-          <View style={styles.featuredSmall}>
-            <Image
-              source={BOOK_LEAF_IMAGE}
-              style={styles.featuredBgImage}
-              resizeMode="cover"
-            />
-            <View style={{ flex: 1, zIndex: 2 }}>
-              <Text style={styles.featuredSmallLabel}>TODAY'S REFLECTION</Text>
-              <Text style={styles.featuredSmallTitle}>
-                What's something you're learning to surrender into God's hands?
+        {/* Featured Prompt Card - Matches "whisper ui journal.jpg" */}
+        <View style={styles.featuredContainer}>
+          <View style={styles.featuredCard}>
+            <View style={{ flex: 1, padding: Spacing.lg }}>
+              <Text style={styles.featuredLabel}>TODAY'S PROMPT</Text>
+              <Text style={styles.featuredTitle}>
+                What's something you're learning to surrender?
               </Text>
-              <TouchableOpacity style={styles.featuredSmallCta}>
-                <Text style={styles.featuredSmallCtaText}>
-                  take a moment to write
-                </Text>
+              <TouchableOpacity style={styles.featuredCta}>
+                <Text style={styles.featuredCtaText}>start writing</Text>
               </TouchableOpacity>
             </View>
+            <Image
+              source={BOOK_LEAF_IMAGE}
+              style={styles.featuredImage}
+              resizeMode="cover"
+            />
           </View>
         </View>
 
@@ -138,116 +144,34 @@ export default function JournalScreen() {
           {entries.map((entry) => (
             <TouchableOpacity
               key={entry.id}
-              style={styles.entryCardNew}
+              style={styles.entryCard}
               activeOpacity={0.85}
             >
-              <View style={styles.entryLeftIconWrap}>
-                <View
-                  style={[
-                    styles.entryIcon,
-                    { backgroundColor: getMoodBg(entry.mood) },
-                  ]}
-                >
-                  <Ionicons
-                    name={iconForMood(entry.mood)}
-                    size={20}
-                    color={Colors.green.primary}
-                  />
-                </View>
+              <View style={styles.entryIconContainer}>
+                <Image
+                  source={MOOD_ICONS[entry.mood as keyof typeof MOOD_ICONS] || MOOD_ICONS.peaceful}
+                  style={styles.moodIconImage}
+                />
               </View>
 
               <View style={styles.entryMain}>
-                <Text style={styles.entryTitleNew}>{entry.title}</Text>
-                <Text style={styles.entryExcerptNew} numberOfLines={1}>
+                <Text style={styles.entryTitle}>{entry.title}</Text>
+                <Text style={styles.entryExcerpt} numberOfLines={1}>
                   {entry.excerpt}
                 </Text>
               </View>
 
               <View style={styles.entryRight}>
-                <Text style={styles.entryDateNew}>{entry.date}</Text>
-                <Ionicons
-                  name="bookmark-outline"
-                  size={16}
-                  color={Colors.text.muted}
-                />
+                <Text style={styles.entryDate}>{entry.date}</Text>
               </View>
             </TouchableOpacity>
           ))}
-        </View>
-
-        {/* Favorites */}
-        <View style={[styles.sectionHeader, { marginTop: Spacing.xl }]}>
-          <Text style={styles.sectionTitle}>FAVORITES</Text>
-          <TouchableOpacity>
-            <Text style={styles.viewAll}>view all</Text>
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity style={styles.favoriteCard} activeOpacity={0.85}>
-          <View style={styles.favoriteLeft}>
-            <View
-              style={[
-                styles.favoriteIcon,
-                { backgroundColor: Colors.moodBg.peaceful },
-              ]}
-            >
-              <Ionicons name="heart" size={18} color={Colors.green.primary} />
-            </View>
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.favoriteTitle}>When I Needed Peace</Text>
-            <Text style={styles.favoriteExcerpt} numberOfLines={1}>
-              You calmed my heart in ways I can't even explain. You always...
-            </Text>
-          </View>
-          <View style={{ marginLeft: 12 }}>
-            <Text style={styles.favoriteDate}>May 12, 2025</Text>
-          </View>
-        </TouchableOpacity>
-
-        {/* Quote Banner */}
-        <View style={styles.quoteWrap}>
-          <Text style={styles.quoteText}>
-            “You keep track of all my sorrows. You have collected all my tears
-            in your bottle.”
-          </Text>
-          <Text style={styles.quoteRef}>PSALM 56:8</Text>
         </View>
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
     </SafeAreaView>
   );
-}
-
-function getMoodBg(mood: string) {
-  switch (mood) {
-    case "grateful":
-      return Colors.moodBg.grateful;
-    case "hopeful":
-      return Colors.moodBg.hopeful;
-    case "peaceful":
-      return Colors.moodBg.peaceful;
-    case "anxious":
-      return Colors.moodBg.anxious;
-    default:
-      return Colors.bg.secondary;
-  }
-}
-
-function iconForMood(mood: string) {
-  switch (mood) {
-    case "grateful":
-      return "sunny-outline";
-    case "hopeful":
-      return "sunny-outline";
-    case "peaceful":
-      return "leaf-outline";
-    case "anxious":
-      return "cloudy-outline";
-    default:
-      return "book-outline";
-  }
 }
 
 const styles = StyleSheet.create({
@@ -257,39 +181,33 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 140,
+    paddingBottom: 40,
   },
   headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.xl,
-    paddingBottom: Spacing.sm,
+    paddingBottom: Spacing.md,
     alignItems: "center",
   },
   logo: {
     fontFamily: "NotoSerif_700Bold",
-    fontSize: 30,
+    fontSize: 32,
     color: Colors.text.primary,
-  },
-  tagline: {
-    fontFamily: "Inter_500Medium",
-    fontSize: 13,
-    color: Colors.text.muted,
-    marginTop: 4,
   },
   headerActions: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 12,
   },
   iconBtn: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     borderRadius: Radius.circle,
     backgroundColor: Colors.bg.card,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: Spacing.sm,
     borderWidth: 1,
     borderColor: Colors.border.soft,
   },
@@ -305,17 +223,20 @@ const styles = StyleSheet.create({
   segmentRow: {
     flexDirection: "row",
     paddingHorizontal: Spacing.lg,
-    marginTop: Spacing.md,
+    marginBottom: Spacing.md,
     gap: 8,
   },
   segmentItem: {
     paddingVertical: 8,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     borderRadius: Radius.pill,
     backgroundColor: Colors.bg.card,
+    borderWidth: 1,
+    borderColor: Colors.border.soft,
   },
   segmentActive: {
-    backgroundColor: Colors.green.faint,
+    backgroundColor: Colors.green.primary,
+    borderColor: Colors.green.primary,
   },
   segmentText: {
     fontFamily: "Inter_600SemiBold",
@@ -323,60 +244,52 @@ const styles = StyleSheet.create({
     color: Colors.text.muted,
   },
   segmentTextActive: {
-    color: Colors.green.primary,
+    color: Colors.white,
   },
-  featuredSmallWrap: {
+  featuredContainer: {
     paddingHorizontal: Spacing.lg,
-    marginTop: Spacing.md,
+    marginBottom: Spacing.xl,
   },
-  featuredSmall: {
+  featuredCard: {
     flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: Colors.bg.card,
+    backgroundColor: Colors.white,
     borderRadius: Radius.lg,
-    padding: Spacing.lg,
+    height: 160,
+    overflow: "hidden",
     ...Shadows.sm,
+    borderWidth: 1,
+    borderColor: Colors.border.soft,
   },
-  featuredSmallLabel: {
+  featuredLabel: {
     fontFamily: "Inter_700Bold",
-    fontSize: 12,
+    fontSize: 11,
     color: Colors.text.muted,
-    marginBottom: 6,
+    marginBottom: 8,
+    letterSpacing: 0.5,
   },
-  featuredSmallTitle: {
+  featuredTitle: {
     fontFamily: "NotoSerif_700Bold",
-    fontSize: 16,
+    fontSize: 18,
     color: Colors.text.primary,
-    lineHeight: 22,
+    lineHeight: 24,
   },
-  featuredSmallCta: {
-    marginTop: Spacing.sm,
+  featuredCta: {
+    marginTop: 12,
   },
-  featuredSmallCtaText: {
+  featuredCtaText: {
     color: Colors.green.primary,
     fontFamily: "Inter_600SemiBold",
+    fontSize: 13,
+    textTransform: "uppercase",
   },
-  featuredSmallImage: {
-    width: 88,
-    height: 88,
-    marginLeft: Spacing.md,
-    borderRadius: Radius.md,
-  },
-  featuredBgImage: {
-    position: "absolute",
-    right: -40,
-    top: -10,
-    width: 220,
-    height: 220,
-    opacity: 0.98,
-    transform: [{ rotate: "90deg" }],
-    borderRadius: Radius.lg,
+  featuredImage: {
+    width: 120,
+    height: "100%",
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: Spacing.lg,
-    marginTop: Spacing.xl,
     marginBottom: Spacing.md,
     alignItems: "center",
   },
@@ -394,109 +307,47 @@ const styles = StyleSheet.create({
   entriesList: {
     paddingHorizontal: Spacing.lg,
   },
-  entryCardNew: {
+  entryCard: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: Colors.bg.card,
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
+    padding: Spacing.md,
     borderRadius: Radius.lg,
     marginBottom: Spacing.sm,
     borderWidth: 1,
     borderColor: Colors.border.soft,
   },
-  entryLeftIconWrap: {
-    width: 56,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: Spacing.sm,
-  },
-  entryIcon: {
-    width: 44,
-    height: 44,
+  entryIconContainer: {
+    width: 48,
+    height: 48,
     borderRadius: Radius.md,
-    alignItems: "center",
-    justifyContent: "center",
+    overflow: "hidden",
+    marginRight: Spacing.md,
+  },
+  moodIconImage: {
+    width: "100%",
+    height: "100%",
   },
   entryMain: {
     flex: 1,
   },
-  entryTitleNew: {
+  entryTitle: {
     fontFamily: "NotoSerif_700Bold",
     fontSize: 16,
     color: Colors.text.primary,
   },
-  entryExcerptNew: {
+  entryExcerpt: {
     fontFamily: "Inter_400Regular",
     fontSize: 13,
     color: Colors.text.secondary,
     marginTop: 4,
   },
   entryRight: {
-    alignItems: "flex-end",
     marginLeft: Spacing.md,
   },
-  entryDateNew: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 12,
-    color: Colors.text.muted,
-    marginBottom: 8,
-  },
-  favoriteCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: Colors.bg.card,
-    padding: Spacing.lg,
-    marginHorizontal: Spacing.lg,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
-    borderColor: Colors.border.soft,
-    marginBottom: Spacing.sm,
-  },
-  favoriteLeft: {
-    marginRight: Spacing.md,
-  },
-  favoriteIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: Radius.md,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  favoriteTitle: {
-    fontFamily: "NotoSerif_700Bold",
-    fontSize: 16,
-    color: Colors.text.primary,
-  },
-  favoriteExcerpt: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 13,
-    color: Colors.text.secondary,
-    marginTop: 4,
-  },
-  favoriteDate: {
+  entryDate: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 12,
-    color: Colors.text.muted,
-  },
-  quoteWrap: {
-    marginHorizontal: Spacing.lg,
-    marginTop: Spacing.lg,
-    padding: Spacing.lg,
-    backgroundColor: Colors.bg.card,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
-    borderColor: Colors.border.soft,
-  },
-  quoteText: {
-    fontFamily: "NotoSerif_700Bold",
-    fontSize: 14,
-    color: Colors.text.primary,
-    marginBottom: 8,
-  },
-  quoteRef: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 12,
+    fontSize: 11,
     color: Colors.text.muted,
   },
   bottomSpacer: {

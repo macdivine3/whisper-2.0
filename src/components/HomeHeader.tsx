@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.md,
-    paddingBottom: Spacing.xs, // Reduced padding to match the tight mockup spacing
+    paddingBottom: Spacing.xs,
     backgroundColor: 'transparent',
   },
   logoBlock: {
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     fontFamily: 'NotoSerif_700Bold',
-    fontSize: 28, // Slightly larger to match the image impact
+    fontSize: 28,
     color: Colors.green.primary,
     letterSpacing: -0.8,
     lineHeight: 34,
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
   },
   tagline: {
     fontFamily: 'Inter_500Medium',
-    fontSize: 10, // Smaller, tighter tagline
+    fontSize: 10,
     color: Colors.text.muted,
     marginTop: -2,
     letterSpacing: 0.2,
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     ...Shadows.sm,
   },
   followUpText: {
-    fontFamily: 'Inter_700Bold', // Bolder font weight for "Follow-up"
+    fontFamily: 'Inter_700Bold',
     fontSize: 13,
     color: Colors.text.primary,
     marginRight: 10,
@@ -110,9 +110,8 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 4,
-    backgroundColor: '#D15D5D', // Soft red notification dot to contrast the green
+    backgroundColor: '#D15D5D',
     borderWidth: 1.5,
     borderColor: Colors.bg.card,
   },
 });
-

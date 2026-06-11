@@ -8,8 +8,8 @@ import {
   Dimensions,
   Platform,
   StatusBar,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -48,7 +48,8 @@ export default function OnboardingScreen() {
   }, []);
 
   const handleGetStarted = async () => {
-    await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
+    // Temporarily disabled to bypass the Native Module error on Expo Go
+    // await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
     router.replace('/(tabs)');
   };
 

@@ -3,14 +3,14 @@ import {
   View,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
   Platform,
   StatusBar,
   Text,
   TouchableOpacity,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Colors, Spacing, Radius, Shadows } from '../../constants/theme';
 
@@ -65,7 +65,7 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Greeting Section */}
-        <HeroGreeting name="Mac Divine" />
+        <HeroGreeting name="David" />
 
         {/* Morning Whisper Card */}
         <WhisperCard
@@ -98,7 +98,7 @@ export default function HomeScreen() {
           <Text style={styles.continueText}>
             {selectedMood ? `talk about feeling ${selectedMood}` : 'continue with whisper'}
           </Text>
-          <Ionicons name="arrow-forward-outline" size={18} color={Colors.white} />
+          <Feather name="arrow-right" size={20} color={Colors.white} />
         </TouchableOpacity>
 
         {/* Bottom padding to offset the floating tab bar */}
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 40, // Reduced to rely on bottomSpacer
+    paddingBottom: 40,
   },
   continueButton: {
     flexDirection: 'row',
@@ -124,23 +124,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: Colors.green.secondary,
     marginHorizontal: Spacing.lg,
-    marginTop: Spacing.xl, // Increased margin to match the airy mockup
-    paddingVertical: 18, // Taller button for more premium feel
-    borderRadius: Radius.md,
+    marginTop: Spacing.xl,
+    paddingVertical: 18,
+    borderRadius: 99,
+    gap: 10,
     ...Shadows.md,
   },
   continueButtonActive: {
     backgroundColor: Colors.green.primary,
   },
   continueText: {
-    fontFamily: 'Inter_700Bold', // Bolder to match the action focus
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 16,
     color: Colors.white,
-    marginRight: Spacing.sm,
-    letterSpacing: -0.2,
+    fontWeight: '600',
   },
   bottomSpacer: {
-    height: 140, // Significant spacer so the floating tab bar never covers the button
+    height: 140,
   },
 });
-

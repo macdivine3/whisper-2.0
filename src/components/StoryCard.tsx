@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors, Radius, Spacing, Shadows } from '../constants/theme';
+import { Feather } from '@expo/vector-icons';
+import { useState } from 'react';
+import { ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Colors, Shadows, Spacing } from '../constants/theme';
 
-// The watercolor JPG from your svjs folder
-const WATERCOLOR_BG = require('../../svjs/story card.jpg');
+// The high-quality background
+const STORY_BG = require('../../assets/images/story-bg.png');
 
 interface StoryCardProps {
   title?: string;
@@ -28,48 +28,50 @@ export default function StoryCard({
       activeOpacity={0.9}
     >
       <ImageBackground
-        source={WATERCOLOR_BG}
+        source={STORY_BG}
         style={styles.card}
         imageStyle={styles.cardImage}
         resizeMode="cover"
       >
-        {/* Semi-transparent dark overlay so text is always readable */}
+        {/* Toned down 'glass' overlay to reduce sharpness */}
         <View style={styles.overlay} />
 
-        {/* Top Row: badge + heart */}
-        <View style={styles.topRow}>
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>today's story</Text>
+        <View style={styles.innerContent}>
+          {/* Top row */}
+          <View style={styles.cardTopRow}>
+            <View style={styles.storyBadge}>
+              <Text style={styles.storyBadgeText}>today's story</Text>
+            </View>
+            <TouchableOpacity onPress={() => setIsLoved(!isLoved)} activeOpacity={0.6} hitSlop={8}>
+              <Feather
+                name="heart"
+                size={22}
+                color={isLoved ? '#E07B7B' : "#fff"}
+              />
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity onPress={() => setIsLoved(!isLoved)} activeOpacity={0.6}>
-            <Ionicons
-              name={isLoved ? 'heart' : 'heart-outline'}
-              size={20}
-              color={Colors.white}
-            />
-          </TouchableOpacity>
-        </View>
 
-        {/* Content */}
-        <View style={styles.content}>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.excerpt}>{excerpt}</Text>
-        </View>
+          {/* Content */}
+          <View style={styles.middleContent}>
+            <Text style={styles.storyTitle}>{title}</Text>
+            <Text style={styles.storyBody}>{excerpt}</Text>
+          </View>
 
-        {/* Bottom Row: read link + share circle */}
-        <View style={styles.bottomRow}>
-          <TouchableOpacity style={styles.actionRow} onPress={onPress} activeOpacity={0.6}>
-            <Text style={styles.actionText}>read full story</Text>
-            <Ionicons name="arrow-forward-outline" size={14} color={Colors.white} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.shareButton}
-            onPress={onSharePress}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="share-social-outline" size={16} color={Colors.text.secondary} />
-          </TouchableOpacity>
+          {/* Bottom row */}
+          <View style={styles.storyBottomRow}>
+            <TouchableOpacity style={styles.readLink} onPress={onPress} activeOpacity={0.6}>
+              <Text style={styles.storyReadLink}>read full story</Text>
+              <Feather name="arrow-right" size={15} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.shareButton}
+              onPress={onSharePress}
+              activeOpacity={0.7}
+              hitSlop={8}
+            >
+              <Feather name="share-2" size={18} color={Colors.text.primary} />
+            </TouchableOpacity>
+          </View>
         </View>
       </ImageBackground>
     </TouchableOpacity>
@@ -80,77 +82,82 @@ const styles = StyleSheet.create({
   touchable: {
     marginHorizontal: Spacing.lg,
     marginVertical: Spacing.xs,
-    borderRadius: Radius.lg,
+    marginBottom: 28,
+    borderRadius: 24,
     overflow: 'hidden',
     ...Shadows.md,
   },
   card: {
-    padding: Spacing.lg,
-    position: 'relative',
+    minHeight: 240,
+    width: '100%',
   },
   cardImage: {
-    borderRadius: Radius.lg,
+    // Ensuring the image covers the whole card area
+    ...StyleSheet.absoluteFill,
+    borderRadius: 24,
   },
   overlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(140, 80, 20, 0.18)', // very subtle warm dark overlay
-    borderRadius: Radius.lg,
+    backgroundColor: 'rgba(0, 0, 0, 0.15)', // Slightly darker glass for better readability
+    borderRadius: 24,
   },
-  topRow: {
+  innerContent: {
+    flex: 1,
+    padding: 24,
+    justifyContent: 'space-between',
+  },
+  cardTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.lg,
   },
-  badge: {
-    backgroundColor: Colors.green.primary,
-    borderRadius: Radius.pill,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 5,
+  storyBadge: {
+    backgroundColor: Colors.green.secondary,
+    borderRadius: 99,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
   },
-  badgeText: {
+  storyBadgeText: {
     fontFamily: 'Inter_600SemiBold',
-    fontSize: 11,
-    color: Colors.white,
-    letterSpacing: 0.2,
+    fontSize: 12,
+    color: '#fff',
+    fontWeight: '600',
   },
-  content: {
-    marginBottom: Spacing.lg,
+  middleContent: {
+    marginVertical: 12,
   },
-  title: {
+  storyTitle: {
     fontFamily: 'NotoSerif_700Bold',
-    fontSize: 24,
-    color: Colors.white,
-    marginBottom: Spacing.xs,
-    lineHeight: 30,
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#fff',
+    marginBottom: 8,
   },
-  excerpt: {
+  storyBody: {
     fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.92)',
-    lineHeight: 20,
+    fontSize: 15,
+    color: 'rgba(255, 255, 255, 0.9)',
+    lineHeight: 22,
   },
-  bottomRow: {
+  storyBottomRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  actionRow: {
+  readLink: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
   },
-  actionText: {
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 13,
-    color: Colors.white,
-    marginRight: 4,
+  storyReadLink: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 14,
+    color: '#fff',
+    fontWeight: '500',
   },
   shareButton: {
-    width: 34,
-    height: 34,
-    borderRadius: Radius.circle,
-    backgroundColor: 'rgba(255,255,255,0.82)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderRadius: 99,
+    padding: 10,
   },
 });

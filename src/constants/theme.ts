@@ -5,60 +5,59 @@
 export const Colors = {
   // Backgrounds
   bg: {
-    primary: '#F9F6F0',      // Lighter, cleaner warm parchment
-    secondary: '#F5F0E6',    // Slightly deeper parchment — card insets
-    card: '#FFFFFF',         // Pure white for cards to pop against the parchment
-    modal: '#F9F6F0',        // Modal backgrounds
+    primary: '#FDFBF7',      // New Canvas Background
+    secondary: '#F5F3EE',    // New Border/Background color
+    card: '#FFFFFF',         // Pure white for cards
+    modal: '#FDFBF7',
   },
 
-
-  // Primary Theme Colors (Forest Green)
+  // Primary Theme Colors (Olive System)
   green: {
-    primary: '#2D5016',      // Main brand green (buttons, icons, primary text)
-    secondary: '#4A7231',    // Lighter green (secondary buttons, subtle icons)
-    muted: '#8B9D77',        // Muted green (inactive states, borders)
-    faint: '#E8EFE5',        // Very faint green (pill backgrounds, highlights)
+    primary: '#3A4434',      // Olive Dark (Main brand & text)
+    secondary: '#596F52',    // Olive Deep (CTA & Active)
+    muted: '#70756B',        // Sage Mid
+    faint: '#F5F3EE',        // Pill Background
   },
 
   // Typography
   text: {
-    primary: '#2C1810',      // Deep warm brown/black (main headers)
-    secondary: '#5C4A42',    // Medium brown (body text, subtitles)
-    muted: '#8C7A72',        // Light brown (captions, placeholders)
+    primary: '#3A4434',      // Olive Dark
+    secondary: '#70756B',    // Sage Mid
+    muted: '#8D8E89',        // Gray Muted
     inverse: '#FFFFFF',      // White text on dark buttons
   },
 
   // Borders & Accents
   border: {
-    default: '#E8DCC8',      // Soft warm beige border
-    soft: '#F0E6D5',         // Very soft border for subtle separators
+    default: '#F5F3EE',      // New Border color
+    soft: '#FDFBF7',
   },
 
   // Functional
   danger: '#C0392B',
   warning: '#D4891A',
-  success: '#2D5016',
+  success: '#3A4434',
   white: '#FFFFFF',
   transparent: 'transparent',
 
-  // Moods (Pastel System)
+  // Moods (Tints from Design)
   mood: {
-    grateful: '#B05555',     // Soft red
-    hopeful: '#C9851A',      // Soft orange
-    peaceful: '#2D5016',     // Soft green
-    anxious: '#7B5EA7',      // Soft purple
-    drained: '#4A7C9E',      // Soft blue
-    overwhelmed: '#7A6951',  // Soft gray/brown
+    grateful: '#3A4434',     // tintGreen
+    hopeful: '#855B27',      // tintAmber
+    peaceful: '#34534A',     // tintTeal
+    anxious: '#7C4E3D',      // tintTerra
+    drained: '#42445E',      // tintSlate
+    overwhelmed: '#534E48',  // tintCharcoal
   },
 
-  // Mood Pill Backgrounds (15% opacity equivalents of the base colors)
+  // Mood Pill Backgrounds (Pastels from Design)
   moodBg: {
-    grateful: '#FBE8E5',
-    hopeful: '#FCF2DC',
-    peaceful: '#E6F0EC',
-    anxious: '#F2EBFA',
-    drained: '#E6EFF4',
-    overwhelmed: '#F0EDEA',
+    grateful: '#E4E9DC',     // moodGreen
+    hopeful: '#FCECD3',      // moodApricot
+    peaceful: '#DCE6E2',     // moodMint
+    anxious: '#F5DDD3',      // moodRose
+    drained: '#E5E4EC',      // moodLavender
+    overwhelmed: '#E9E6E1',  // moodBrown
   }
 } as const;
 

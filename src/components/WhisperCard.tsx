@@ -31,16 +31,16 @@ export default function WhisperCard({
     setModalVisible(true);
     Animated.timing(slideAnim, {
       toValue: 0,
-      duration: 800, // Slower, elegant rise (800ms)
+      duration: 800,
       useNativeDriver: true,
-      easing: Easing.out(Easing.exp), // Smooth deceleration
+      easing: Easing.out(Easing.exp),
     }).start();
   };
 
   const closeModal = () => {
     Animated.timing(slideAnim, {
       toValue: SCREEN_HEIGHT,
-      duration: 400, // Faster close
+      duration: 400,
       useNativeDriver: true,
       easing: Easing.in(Easing.ease),
     }).start(() => {
@@ -109,7 +109,7 @@ export default function WhisperCard({
       <Modal
         visible={modalVisible}
         transparent={true}
-        animationType="none" // Turn off OS animation so our custom one runs
+        animationType="none"
         onRequestClose={closeModal}
       >
         <View style={styles.modalOverlay}>
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.bg.card,
     borderRadius: Radius.lg,
-    padding: 18, // Reduced to make the box smaller
+    padding: 18,
     marginHorizontal: Spacing.lg,
     marginVertical: Spacing.xs,
     borderWidth: 1,
@@ -180,14 +180,14 @@ const styles = StyleSheet.create({
   },
   watermarkContainer: {
     position: 'absolute',
-    bottom: -110, // Pulled down so the stem comes directly from the bottom edge
-    right: -45, // Shifted right slightly
+    bottom: -110,
+    right: -45,
     zIndex: 0,
     opacity: 0.3,
-    transform: [{ rotate: '-0.9deg' }], // Slight slant
+    transform: [{ rotate: '-0.9deg' }],
   },
   watermarkImage: {
-    width: 210, // Increased size significantly
+    width: 210,
     height: 335,
   },
   topRow: {
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     marginLeft: 5,
   },
   textContent: {
-    width: '72%', // Constrains text strictly to the left side, exposing the right side leaf
+    width: '72%',
     zIndex: 1,
   },
   title: {
@@ -258,13 +258,13 @@ const styles = StyleSheet.create({
     borderTopRightRadius: Radius.xl,
     padding: Spacing.lg,
     paddingBottom: Spacing.xxl,
-    minHeight: SCREEN_HEIGHT * 0.5, // Rises up from the bottom
-    ...Shadows.md, // Changed from lg
+    minHeight: SCREEN_HEIGHT * 0.5,
+    ...Shadows.md,
   },
   modalHandle: {
     width: 40,
     height: 4,
-    backgroundColor: Colors.border.default, // Changed from strong
+    backgroundColor: Colors.border.default,
     borderRadius: Radius.pill,
     alignSelf: 'center',
     marginBottom: Spacing.lg,

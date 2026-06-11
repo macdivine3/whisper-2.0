@@ -1,24 +1,25 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors, Radius, Spacing, Shadows } from '../constants/theme';
+import { Feather, Ionicons } from '@expo/vector-icons';
+import { Colors, Spacing } from '../constants/theme';
 
 interface MoodItem {
   id: string;
   label: string;
-  icon: keyof typeof Ionicons.glyphMap;
+  iconType: 'feather' | 'ionicons';
+  icon: string;
   color: string;
   bgColor: string;
 }
 
-// Exactly 6 moods — 3 columns x 2 rows — icons match the mockup
+// Icons matching the reference UI image exactly
 const MOODS: MoodItem[] = [
-  { id: 'grateful',    label: 'grateful',    icon: 'leaf',          color: '#4D7C5A', bgColor: '#F0F5F1' },
-  { id: 'hopeful',     label: 'hopeful',     icon: 'sunny',         color: '#C47F2A', bgColor: '#FCF5EB' },
-  { id: 'peaceful',    label: 'peaceful',    icon: 'leaf-outline',  color: '#4A8FA8', bgColor: '#F0F7F9' },
-  { id: 'anxious',     label: 'anxious',     icon: 'cloud',         color: '#B05A5A', bgColor: '#F9F1F1' },
-  { id: 'drained',     label: 'drained',     icon: 'water',         color: '#7A7A9A', bgColor: '#F3F3F7' },
-  { id: 'overwhelmed', label: 'overwhelmed', icon: 'rainy',         color: '#5A7A9A', bgColor: '#F1F5F9' },
+  { id: 'grateful',    label: 'grateful',    iconType: 'ionicons', icon: 'leaf',       color: Colors.mood.grateful,    bgColor: Colors.moodBg.grateful },
+  { id: 'hopeful',     label: 'hopeful',     iconType: 'feather',  icon: 'sun',        color: Colors.mood.hopeful,     bgColor: Colors.moodBg.hopeful },
+  { id: 'peaceful',   label: 'peaceful',    iconType: 'ionicons', icon: 'leaf-outline', color: Colors.mood.peaceful,  bgColor: Colors.moodBg.peaceful },
+  { id: 'anxious',    label: 'anxious',     iconType: 'feather',  icon: 'cloud',      color: Colors.mood.anxious,     bgColor: Colors.moodBg.anxious },
+  { id: 'drained',    label: 'drained',     iconType: 'feather',  icon: 'droplet',    color: Colors.mood.drained,     bgColor: Colors.moodBg.drained },
+  { id: 'overwhelmed', label: 'overwhelmed', iconType: 'feather', icon: 'cloud-rain', color: Colors.mood.overwhelmed, bgColor: Colors.moodBg.overwhelmed },
 ];
 
 interface MoodGridProps {
@@ -30,38 +31,40 @@ export default function MoodGrid({ onSelectMood, selectedMood }: MoodGridProps) 
   return (
     <View style={styles.container}>
       {/* Section label */}
-      <Text style={styles.sectionTitle}>HOW ARE YOU FEELING?</Text>
+      <Text style={styles.moodHeaderUpper}>HOW ARE YOU FEELING?</Text>
 
       {/* Sub-header row */}
-      <View style={styles.headerRow}>
-        <View style={styles.leftHeader}>
-          <Text style={styles.subtitle}>how are you feeling?</Text>
-          <TouchableOpacity activeOpacity={0.6} style={styles.infoIcon}>
-            <Ionicons name="information-circle-outline" size={15} color={Colors.text.muted} />
-          </TouchableOpacity>
+      <View style={styles.moodSubRow}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+          <Text style={styles.moodHeaderLower}>how are you feeling?</Text>
+          <Feather name="info" size={13} color={Colors.text.muted} />
         </View>
         <TouchableOpacity activeOpacity={0.6}>
-          <Text style={styles.editLink}>edit mood</Text>
+          <Text style={styles.editMoodText}>edit mood</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Grid: 3 columns x 2 rows */}
-      <View style={styles.grid}>
+      {/* Grid */}
+      <View style={styles.moodGrid}>
         {MOODS.map((mood) => {
           const isSelected = selectedMood === mood.id;
           return (
             <TouchableOpacity
               key={mood.id}
               style={[
-                styles.moodPill,
+                styles.moodChip,
                 { backgroundColor: mood.bgColor },
                 isSelected && { borderColor: mood.color, borderWidth: 1.5 },
               ]}
               onPress={() => onSelectMood?.(mood.id)}
               activeOpacity={0.75}
             >
-              <Ionicons name={mood.icon} size={15} color={mood.color} style={styles.icon} />
-              <Text style={[styles.moodLabel, { color: mood.color }]}>{mood.label}</Text>
+              {mood.iconType === 'ionicons' ? (
+                <Ionicons name={mood.icon as any} size={15} color={mood.color} />
+              ) : (
+                <Feather name={mood.icon as any} size={15} color={mood.color} />
+              )}
+              <Text style={[styles.moodChipLabel, { color: mood.color }]}>{mood.label}</Text>
             </TouchableOpacity>
           );
         })}
@@ -73,67 +76,51 @@ export default function MoodGrid({ onSelectMood, selectedMood }: MoodGridProps) 
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: Spacing.lg,
-    marginTop: Spacing.xl, // More breathing room
-    marginBottom: Spacing.md,
+    marginBottom: 20,
   },
-  sectionTitle: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 9, // Smaller, more precise small-caps
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
-    color: Colors.green.primary,
-    marginBottom: 6,
-    opacity: 0.8,
+  moodHeaderUpper: {
+    fontFamily: 'Inter_800ExtraBold',
+    fontSize: 10,
+    fontWeight: '800',
+    color: Colors.text.primary,
+    letterSpacing: 1.2,
+    marginBottom: 3,
   },
-  headerRow: {
+  moodSubRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.md,
+    marginBottom: 12,
   },
-  leftHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  subtitle: {
-    fontFamily: 'NotoSerif_700Bold', // Bold serif to match other headers
-    fontSize: 20,
+  moodHeaderLower: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 14,
     color: Colors.text.primary,
-    letterSpacing: -0.3,
+    fontWeight: '500',
   },
-  infoIcon: {
-    marginLeft: 8,
-    marginTop: 2,
-  },
-  editLink: {
-    fontFamily: 'Inter_600SemiBold',
+  editMoodText: {
+    fontFamily: 'Inter_400Regular',
     fontSize: 12,
-    color: Colors.green.primary, // Links usually brand color
+    color: Colors.text.secondary,
   },
-  // 3-column grid
-  grid: {
+  moodGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10, // Slightly more gap
+    gap: 8,
   },
-  moodPill: {
-    width: '31.2%',
+  moodChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    borderRadius: Radius.md,
-    borderWidth: 1,
-    borderColor: 'transparent',
-    ...Shadows.sm,
+    gap: 6,
+    borderRadius: 99,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    width: '30%',
+    flexGrow: 1,
   },
-  icon: {
-    marginRight: 6,
-  },
-  moodLabel: {
-    fontFamily: 'Inter_600SemiBold', // Slightly bolder label
-    fontSize: 11,
-    textTransform: 'lowercase',
-    flexShrink: 1,
+  moodChipLabel: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 12,
+    fontWeight: '500',
   },
 });
