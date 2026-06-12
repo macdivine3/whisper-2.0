@@ -52,19 +52,9 @@ export default function TabLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
-        name="prayers"
-        options={{
-          title: 'prayers',
-          tabBarIcon: ({ color, focused }) => (
-            <View style={[styles.iconContainer, focused && styles.activeIconContainer]}>
-              <Feather name="heart" size={20} color={focused ? Colors.white : color} />
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
+        name="follow-up"
         options={{
           title: 'profile',
           tabBarIcon: ({ color, focused }) => (

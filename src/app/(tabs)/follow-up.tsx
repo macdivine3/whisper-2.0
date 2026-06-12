@@ -19,7 +19,7 @@ import { Colors, Radius, Shadows, Spacing } from '../../constants/theme';
 const { width } = Dimensions.get('window');
 
 // Assets
-const MAILBOX_IMAGE = require('../../../svjs/gemini-2.5-flash-image_Remove_the_background_completely_and_make_the_edges_of_the_illustration_fade_out-0.png');
+const MAILBOX_IMAGE = require('../../../svjs/gemini-2.5-flash-image_Remove_the_background_completely_and_make_the_edges_of_the_illustration_fade_out-0-removebg-preview.png');
 const HEART_IMAGE = require('../../../svjs/fainted heart-Photoroom.png');
 const CANDLE_IMAGE = require('../../../svjs/candle-Photoroom.png');
 
@@ -55,21 +55,28 @@ export default function FollowUpScreen() {
             </View>
             <Text style={styles.tagline}>Whisper's check-in, just for you.</Text>
 
-            {/* Memory Box */}
-            <View style={styles.memoryBox}>
-              <View style={styles.memoryIconCircle}>
-                <Ionicons name="leaf-outline" size={12} color={Colors.green.secondary} />
-              </View>
-              <View style={styles.memoryTextContainer}>
-                <Text style={styles.memoryTagText}>Whisper remembers</Text>
-                <View style={styles.memoryMessageRow}>
-                  <Text style={styles.memoryMessage}>You've been feeling </Text>
-                  <View style={styles.moodHighlightBg}>
-                    <Text style={styles.moodHighlightText}>overwhelmed.</Text>
-                  </View>
+            {/* Memory Box with Pray Overlap */}
+            <View style={styles.memoryBoxContainer}>
+              <View style={styles.memoryBox}>
+                <View style={styles.memoryIconCircle}>
+                  <Ionicons name="leaf-outline" size={12} color={Colors.green.secondary} />
                 </View>
-                <Text style={styles.memorySub}>I'm here to walk with you.</Text>
+                <View style={styles.memoryTextContainer}>
+                  <Text style={styles.memoryTagText}>Whisper remembers</Text>
+                  <View style={styles.memoryMessageRow}>
+                    <Text style={styles.memoryMessage}>You've been feeling </Text>
+                    <View style={styles.moodHighlightBg}>
+                      <Text style={styles.moodHighlightText}>overwhelmed.</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.memorySub}>I'm here to walk with you.</Text>
+                </View>
               </View>
+
+              <TouchableOpacity style={styles.prayAboutItCard} activeOpacity={0.8}>
+                <Ionicons name="hand-right-outline" size={14} color={Colors.white} style={{ marginRight: 6 }} />
+                <Text style={styles.prayAboutItText}>pray about it??</Text>
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -256,7 +263,7 @@ export default function FollowUpScreen() {
                 <Text style={styles.gridCardSub}>open journal</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.gridCard} onPress={() => router.push('/prayers')} activeOpacity={0.7}>
+              <TouchableOpacity style={styles.gridCard} onPress={() => { }} activeOpacity={0.7}>
                 <Ionicons name="hand-right-outline" size={24} color={Colors.green.primary} style={styles.gridIcon} />
                 <Text style={styles.gridCardTitle}>say a prayer</Text>
                 <Text style={styles.gridCardSub}>pray together</Text>
@@ -362,6 +369,10 @@ const styles = StyleSheet.create({
     marginTop: 4,
     marginBottom: Spacing.xl,
   },
+  memoryBoxContainer: {
+    position: 'relative',
+    marginBottom: Spacing.xl + 10, // extra margin for overlap
+  },
   memoryBox: {
     backgroundColor: Colors.bg.primary,
     borderRadius: Radius.lg,
@@ -370,6 +381,26 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E8E2D8',
     ...Shadows.sm,
+  },
+  prayAboutItCard: {
+    position: 'absolute',
+    // MOVE OVERLAP POSITION
+    bottom: -20, // Overlap bottom (more negative = lower)
+    right: -10,  // Overlap right (negative = sticking out past the edge)
+    backgroundColor: Colors.green.primary,
+    borderRadius: Radius.pill,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    ...Shadows.md,
+    elevation: 4,
+    zIndex: 10,
+  },
+  prayAboutItText: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 11,
+    color: Colors.white,
   },
   memoryIconCircle: {
     width: 24,

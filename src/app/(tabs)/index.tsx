@@ -58,7 +58,7 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.bg.primary} />
 
-      <HomeHeader onFollowUpPress={() => router.push('/profile')} />
+      <HomeHeader onFollowUpPress={() => router.push('/follow-up')} />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
