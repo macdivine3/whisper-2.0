@@ -4,7 +4,13 @@ import { Colors, Radius, Shadows, Spacing } from '../../constants/theme';
 
 const BOOK_LEAF_IMAGE = require('../../../svjs/book_leaf-removebg-preview.png');
 
-export default function JournalPromptCard() {
+const PROMPT_TEXT = "What's something you're learning to surrender into God's hands?";
+
+interface Props {
+  onPress?: (prompt: string) => void;
+}
+
+export default function JournalPromptCard({ onPress }: Props) {
   return (
     <View style={styles.featuredContainer}>
       <View style={styles.featuredCard}>
@@ -14,11 +20,13 @@ export default function JournalPromptCard() {
             <Text style={styles.featuredLabel}>TODAY'S REFLECTION</Text>
           </View>
 
-          <Text style={styles.featuredTitle}>
-            What's something you're learning to surrender into God's hands?
-          </Text>
+          <Text style={styles.featuredTitle}>{PROMPT_TEXT}</Text>
 
-          <TouchableOpacity style={styles.featuredCta} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={styles.featuredCta}
+            activeOpacity={0.7}
+            onPress={() => onPress?.(PROMPT_TEXT)}
+          >
             <Ionicons name="leaf-outline" size={16} color={Colors.green.primary} />
             <Text style={styles.featuredCtaText}>take a moment to write</Text>
           </TouchableOpacity>

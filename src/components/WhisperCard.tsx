@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { Animated, Dimensions, Easing, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Colors, Radius, Shadows, Spacing } from '../constants/theme';
+import { buildMorningWhisperShare, shareText } from '../lib/share';
 
 const LEAF_BG = require('../../assets/images/leaf-transparent.png');
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -55,6 +56,9 @@ export default function WhisperCard({
       openModal();
     }
   };
+
+  const handleShare = () =>
+    shareText(buildMorningWhisperShare({ title, verse, reference, reflection }));
 
   return (
     <>
@@ -120,7 +124,7 @@ export default function WhisperCard({
               <TouchableOpacity style={styles.modalLikeBtn} onPress={() => setIsLoved(!isLoved)}>
                 <Ionicons name={isLoved ? 'heart' : 'heart-outline'} size={24} color={isLoved ? '#E07B7B' : Colors.text.primary} />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.modalShareBtn}><Text style={styles.modalShareText}>share whisper</Text></TouchableOpacity>
+              <TouchableOpacity style={styles.modalShareBtn} onPress={handleShare} activeOpacity={0.85}><Text style={styles.modalShareText}>share whisper</Text></TouchableOpacity>
             </View>
           </Animated.View>
         </View>

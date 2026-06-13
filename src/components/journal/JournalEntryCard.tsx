@@ -12,23 +12,24 @@ const MOOD_ICONS = {
   hopeful: require('../../../svjs/grateful-removebg-preview.png'), // Fallback
 };
 
-interface JournalEntry {
-  id: string;
-  title: string;
-  date: string;
-  excerpt: string;
-  mood: string;
-  color: string;
-  isFavorite?: boolean;
-}
+import type { JournalEntry } from '../../lib/journal';
 
 interface Props {
   entry: JournalEntry;
+  onPress?: (entry: JournalEntry) => void;
+  onLongPress?: (entry: JournalEntry) => void;
+  onToggleFavorite?: (entry: JournalEntry) => void;
 }
 
-export default function JournalEntryCard({ entry }: Props) {
+export default function JournalEntryCard({ entry, onPress, onLongPress, onToggleFavorite }: Props) {
   return (
-    <TouchableOpacity style={styles.entryCard} activeOpacity={0.85}>
+    <TouchableOpacity
+      style={styles.entryCard}
+      activeOpacity={0.85}
+      onPress={() => onPress?.(entry)}
+      onLongPress={() => onLongPress?.(entry)}
+      delayLongPress={350}
+    >
       <View style={[styles.moodIconBg, { backgroundColor: entry.color + '15' }]}>
         <Image
           source={MOOD_ICONS[entry.mood as keyof typeof MOOD_ICONS] || MOOD_ICONS.peaceful}
@@ -49,12 +50,17 @@ export default function JournalEntryCard({ entry }: Props) {
       <View style={styles.entryRight}>
         <View style={styles.entryRightTop}>
           <Text style={styles.entryDate}>{entry.date}</Text>
-          <Ionicons
-            name={entry.isFavorite ? 'bookmark' : 'bookmark-outline'}
-            size={18}
-            color={entry.isFavorite ? Colors.green.primary : Colors.text.muted}
+          <TouchableOpacity
+            onPress={() => onToggleFavorite?.(entry)}
+            hitSlop={10}
             style={{ marginLeft: 6 }}
-          />
+          >
+            <Ionicons
+              name={entry.isFavorite ? 'bookmark' : 'bookmark-outline'}
+              size={18}
+              color={entry.isFavorite ? Colors.green.primary : Colors.text.muted}
+            />
+          </TouchableOpacity>
         </View>
         <View style={[styles.emotionTag, { backgroundColor: entry.color + '20' }]}>
           <Text style={[styles.emotionTagText, { color: entry.color }]}>{entry.mood}</Text>

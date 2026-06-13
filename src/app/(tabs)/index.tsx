@@ -23,7 +23,10 @@ import MoodGrid from '../../components/MoodGrid';
 import NightWhisperCard from '../../components/NightWhisperCard';
 
 // Import Data
-import { morningWhispers, dailyStories } from '../../data/dailyContent';
+import { morningWhispers, nightWhispers, dailyStories } from '../../data/dailyContent';
+
+// Share helpers
+import { buildStoryShare, shareText } from '../../lib/share';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -40,7 +43,12 @@ export default function HomeScreen() {
 
   // Get daily content
   const dailyMorningWhisper = morningWhispers[getDailyIndex(morningWhispers.length)];
+  const dailyNightWhisper = nightWhispers[getDailyIndex(nightWhispers.length)];
   const dailyStory = dailyStories[getDailyIndex(dailyStories.length)];
+
+  // Time of day decides which whisper shows: morning 8:00am–5:59pm, otherwise night.
+  const hour = new Date().getHours();
+  const isMorning = hour >= 8 && hour < 18;
 
   const handleMoodSelect = (moodId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -69,20 +77,37 @@ export default function HomeScreen() {
 
         {/* Pulling cards up by using very small vertical margins/spacing */}
         <View style={styles.cardStack}>
-          {/* Morning Whisper Card */}
-          <WhisperCard
-            type="morning"
-            title={dailyMorningWhisper.title}
-            verse={dailyMorningWhisper.verse}
-            reference={dailyMorningWhisper.reference}
-            reflection={dailyMorningWhisper.reflection}
-          />
+          {/* Whisper Card — morning or night depending on the time of day */}
+          {isMorning ? (
+            <WhisperCard
+              type="morning"
+              title={dailyMorningWhisper.title}
+              verse={dailyMorningWhisper.verse}
+              reference={dailyMorningWhisper.reference}
+              reflection={dailyMorningWhisper.reflection}
+            />
+          ) : (
+            <NightWhisperCard
+              title={dailyNightWhisper.title}
+              message={dailyNightWhisper.message}
+              whisper={dailyNightWhisper.whisper}
+            />
+          )}
 
           {/* Story Card */}
           <StoryCard
             title={dailyStory.title}
             excerpt={dailyStory.deepComment}
-            onPress={() => router.push('/journal')}
+            onPress={() => router.push({ pathname: '/story', params: { id: dailyStory.id } })}
+            onSharePress={() =>
+              shareText(
+                buildStoryShare({
+                  title: dailyStory.title,
+                  deepComment: dailyStory.deepComment,
+                  verse: dailyStory.verse,
+                })
+              )
+            }
           />
         </View>
 

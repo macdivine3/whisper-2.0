@@ -2,7 +2,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Colors, Radius, Shadows, Spacing } from '../../constants/theme';
 
-export default function JournalHeader() {
+interface Props {
+  onNewEntry?: () => void;
+}
+
+export default function JournalHeader({ onNewEntry }: Props) {
   return (
     <View style={styles.headerRow}>
       <View>
@@ -18,7 +22,7 @@ export default function JournalHeader() {
           <Ionicons name="search-outline" size={20} color={Colors.text.primary} />
         </TouchableOpacity>
         <View style={styles.addBtnContainer}>
-          <TouchableOpacity style={styles.addBtn}>
+          <TouchableOpacity style={styles.addBtn} onPress={onNewEntry} activeOpacity={0.85}>
             <Ionicons name="add" size={24} color={Colors.white} />
           </TouchableOpacity>
           <Text style={styles.addBtnText}>new entry</Text>

@@ -48,8 +48,13 @@ export default function OnboardingScreen() {
   }, []);
 
   const handleGetStarted = async () => {
-    // Temporarily disabled to bypass the Native Module error on Expo Go
-    // await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
+    // Remember that onboarding is done so we don't show it again next launch.
+    // Fail soft: if storage is unavailable we still let the user in.
+    try {
+      await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
+    } catch (e) {
+      console.warn('Could not persist onboarding flag', e);
+    }
     router.replace('/(tabs)');
   };
 

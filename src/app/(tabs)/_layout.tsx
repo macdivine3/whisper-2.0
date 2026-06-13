@@ -7,7 +7,7 @@ export default function TabLayout() {
   const segments = useSegments();
   
   // Hide tab bar on the whispers chat screen
-  const isWhisperChat = segments.includes('whispers');
+  const isWhisperChat = (segments as string[]).includes('whispers');
 
   return (
     <Tabs

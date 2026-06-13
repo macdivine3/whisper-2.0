@@ -79,6 +79,14 @@ export default function RootLayout() {
           options={{ headerShown: false, animation: "fade" }}
         />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="journal-entry"
+          options={{ headerShown: false, animation: "slide_from_bottom" }}
+        />
+        <Stack.Screen
+          name="story"
+          options={{ headerShown: false, animation: "slide_from_right" }}
+        />
       </Stack>
     </>
   );

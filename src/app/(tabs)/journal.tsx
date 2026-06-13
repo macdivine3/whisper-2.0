@@ -1,58 +1,78 @@
-import { useState } from 'react';
-import { ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import { Alert, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect, useRouter } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 import { Colors, Spacing } from '../../constants/theme';
 
 // Import Refactored Components
 import JournalHeader from '../../components/journal/JournalHeader';
 import JournalSubTabs from '../../components/journal/JournalSubTabs';
 import JournalPromptCard from '../../components/journal/JournalPromptCard';
-import JournalEntryCard, { JournalEntry } from '../../components/journal/JournalEntryCard';
+import JournalEntryCard from '../../components/journal/JournalEntryCard';
 import JournalVerseCard from '../../components/journal/JournalVerseCard';
+
+// Data layer
+import { getEntries, toggleFavorite, deleteEntry, JournalEntry } from '../../lib/journal';
 
 type TabType = 'entries' | 'favorites' | 'prompts';
 
 export default function JournalScreen() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>('entries');
+  const [entries, setEntries] = useState<JournalEntry[]>([]);
 
-  const [entries] = useState<JournalEntry[]>([
-    {
-      id: 'e1',
-      title: 'Feeling Overwhelmed',
-      date: 'May 18, 2025',
-      excerpt: "Today was a lot. My mind wouldn't stop racing and I felt like I was failing in so...",
-      mood: 'anxious',
-      color: '#8B8B8B',
-    },
-    {
-      id: 'e2',
-      title: 'Grateful for the Little Things',
-      date: 'May 17, 2025',
-      excerpt: 'God really showed up in the small moments today. The sunrise, a kind...',
-      mood: 'grateful',
-      color: '#C9851A',
-    },
-    {
-      id: 'e3',
-      title: 'A Quiet Night Prayer',
-      date: 'May 16, 2025',
-      excerpt: 'Lord, I\'m laying it all down tonight. Thank You for being close when...',
-      mood: 'hopeful',
-      color: '#C9851A',
-    },
-  ]);
+  // Reload entries every time the screen comes into focus — so a newly saved
+  // entry shows up the instant we return from the writing modal.
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      getEntries().then((data) => {
+        if (active) setEntries(data);
+      });
+      return () => {
+        active = false;
+      };
+    }, [])
+  );
 
-  const favoriteEntries: JournalEntry[] = [
-    {
-      id: 'f1',
-      title: 'When I Needed Peace',
-      date: 'May 12, 2025',
-      excerpt: 'You calmed my heart in ways I can\'t even explain. You always...',
-      mood: 'peaceful',
-      color: '#6B8E78',
-      isFavorite: true,
-    },
-  ];
+  const favoriteEntries = entries.filter((e) => e.isFavorite);
+
+  const handleToggleFavorite = async (entry: JournalEntry) => {
+    const next = await toggleFavorite(entry.id);
+    setEntries(next);
+  };
+
+  const handleDelete = (entry: JournalEntry) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Alert.alert(
+      'Delete this entry?',
+      `"${entry.title}" will be permanently removed.`,
+      [
+        { text: 'Keep it', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            const next = await deleteEntry(entry.id);
+            setEntries(next);
+          },
+        },
+      ]
+    );
+  };
+
+  const openNewEntry = (prompt?: string) => {
+    router.push({
+      pathname: '/journal-entry',
+      params: prompt ? { prompt } : undefined,
+    });
+  };
+
+  const openEntry = (entry: JournalEntry) => {
+    // Reading a full entry is a future slice; for now the write modal is the
+    // canonical entry surface. Tapping favorites/bookmark already works.
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -63,7 +83,7 @@ export default function JournalScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <JournalHeader />
+        <JournalHeader onNewEntry={() => openNewEntry()} />
 
         {/* Segmented Tabs */}
         <JournalSubTabs
@@ -74,7 +94,7 @@ export default function JournalScreen() {
         {activeTab === 'entries' && (
           <>
             {/* Featured Prompt Card */}
-            <JournalPromptCard />
+            <JournalPromptCard onPress={(prompt) => openNewEntry(prompt)} />
 
             {/* Recent Entries */}
             <View style={styles.sectionHeader}>
@@ -85,24 +105,46 @@ export default function JournalScreen() {
             </View>
 
             <View style={styles.entriesList}>
-              {entries.map((entry) => (
-                <JournalEntryCard key={entry.id} entry={entry} />
-              ))}
+              {entries.length === 0 ? (
+                <Text style={styles.emptyText}>
+                  Your heart's pages are blank. Tap + to write your first entry.
+                </Text>
+              ) : (
+                entries.map((entry) => (
+                  <JournalEntryCard
+                    key={entry.id}
+                    entry={entry}
+                    onPress={openEntry}
+                    onLongPress={handleDelete}
+                    onToggleFavorite={handleToggleFavorite}
+                  />
+                ))
+              )}
             </View>
 
             {/* Favorites Section */}
-            <View style={[styles.sectionHeader, { marginTop: Spacing.xl }]}>
-              <Text style={styles.sectionTitle}>FAVORITES</Text>
-              <TouchableOpacity>
-                <Text style={styles.viewAll}>view all &gt;</Text>
-              </TouchableOpacity>
-            </View>
+            {favoriteEntries.length > 0 && (
+              <>
+                <View style={[styles.sectionHeader, { marginTop: Spacing.xl }]}>
+                  <Text style={styles.sectionTitle}>FAVORITES</Text>
+                  <TouchableOpacity onPress={() => setActiveTab('favorites')}>
+                    <Text style={styles.viewAll}>view all &gt;</Text>
+                  </TouchableOpacity>
+                </View>
 
-            <View style={styles.entriesList}>
-              {favoriteEntries.map((entry) => (
-                <JournalEntryCard key={entry.id} entry={entry} />
-              ))}
-            </View>
+                <View style={styles.entriesList}>
+                  {favoriteEntries.map((entry) => (
+                    <JournalEntryCard
+                      key={entry.id}
+                      entry={entry}
+                      onPress={openEntry}
+                      onLongPress={handleDelete}
+                      onToggleFavorite={handleToggleFavorite}
+                    />
+                  ))}
+                </View>
+              </>
+            )}
 
             {/* Verse Card at the bottom */}
             <JournalVerseCard />
@@ -111,15 +153,27 @@ export default function JournalScreen() {
 
         {activeTab === 'favorites' && (
           <View style={styles.entriesList}>
-            {favoriteEntries.map((entry) => (
-              <JournalEntryCard key={entry.id} entry={entry} />
-            ))}
+            {favoriteEntries.length === 0 ? (
+              <Text style={styles.emptyText}>
+                No favorites yet. Tap the bookmark on any entry to keep it close.
+              </Text>
+            ) : (
+              favoriteEntries.map((entry) => (
+                <JournalEntryCard
+                  key={entry.id}
+                  entry={entry}
+                  onPress={openEntry}
+                  onLongPress={handleDelete}
+                  onToggleFavorite={handleToggleFavorite}
+                />
+              ))
+            )}
           </View>
         )}
 
         {activeTab === 'prompts' && (
           <View style={styles.promptsTabContainer}>
-            <JournalPromptCard />
+            <JournalPromptCard onPress={(prompt) => openNewEntry(prompt)} />
           </View>
         )}
 
@@ -158,6 +212,14 @@ const styles = StyleSheet.create({
   },
   entriesList: {
     paddingHorizontal: Spacing.lg,
+  },
+  emptyText: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 13,
+    color: Colors.text.muted,
+    textAlign: 'center',
+    lineHeight: 20,
+    paddingVertical: Spacing.lg,
   },
   promptsTabContainer: {
     marginTop: Spacing.md,
