@@ -20,7 +20,6 @@ import HeroGreeting from '../../components/HeroGreeting';
 import WhisperCard from '../../components/WhisperCard';
 import StoryCard from '../../components/StoryCard';
 import MoodGrid from '../../components/MoodGrid';
-import NightWhisperCard from '../../components/NightWhisperCard';
 
 // Import Data
 import { morningWhispers, nightWhispers, dailyStories } from '../../data/dailyContent';
@@ -77,7 +76,7 @@ export default function HomeScreen() {
 
         {/* Pulling cards up by using very small vertical margins/spacing */}
         <View style={styles.cardStack}>
-          {/* Whisper Card — morning or night depending on the time of day */}
+          {/* Whisper Card — same light card design; content + label change by time */}
           {isMorning ? (
             <WhisperCard
               type="morning"
@@ -87,10 +86,12 @@ export default function HomeScreen() {
               reflection={dailyMorningWhisper.reflection}
             />
           ) : (
-            <NightWhisperCard
+            <WhisperCard
+              type="night"
               title={dailyNightWhisper.title}
-              message={dailyNightWhisper.message}
-              whisper={dailyNightWhisper.whisper}
+              // The short poetic line reads as the quote; the longer message is the reflection.
+              verse={dailyNightWhisper.whisper}
+              reflection={dailyNightWhisper.message}
             />
           )}
 

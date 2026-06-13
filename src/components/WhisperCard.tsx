@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { Animated, Dimensions, Easing, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Dimensions, Easing, Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Colors, Radius, Shadows, Spacing } from '../constants/theme';
-import { buildMorningWhisperShare, shareText } from '../lib/share';
+import { buildWhisperShare, shareText } from '../lib/share';
 
 const LEAF_BG = require('../../assets/images/leaf-transparent.png');
+const CANDLE_BG = require('../../svjs/candle-Photoroom.png');
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface WhisperCardProps {
@@ -27,6 +28,14 @@ export default function WhisperCard({
   const [isLoved, setIsLoved] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const slideAnim = React.useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+
+  // Logic to determine if we should show the candle
+  const currentHour = new Date().getHours();
+  // SET THIS TO 'true' IF YOU WANT TO SEE THE CANDLE RIGHT NOW REGARDLESS OF TIME
+  const FORCE_NIGHT_MODE = false;
+
+  const isNightWhisperTime = FORCE_NIGHT_MODE || (currentHour >= 18 || currentHour < 8); // 6 PM to 7:59 AM
+  const activeBackground = isNightWhisperTime ? CANDLE_BG : LEAF_BG;
 
   const openModal = () => {
     setModalVisible(true);
@@ -58,16 +67,19 @@ export default function WhisperCard({
   };
 
   const handleShare = () =>
-    shareText(buildMorningWhisperShare({ title, verse, reference, reflection }));
+    shareText(buildWhisperShare(type, { title, verse, reference, reflection }));
 
   return (
     <>
       <View style={styles.card}>
-        {/* Leaf stays exactly as it was */}
+        {/* Leaf or Candle watermark */}
         <View style={styles.watermarkContainer}>
           <Image
-            source={LEAF_BG}
-            style={styles.watermarkImage}
+            source={activeBackground}
+            style={[
+              styles.watermarkImage,
+              isNightWhisperTime && styles.candleWatermarkAdjust
+            ]}
             resizeMode="contain"
           />
         </View>
@@ -75,9 +87,9 @@ export default function WhisperCard({
         {/* Top Row */}
         <View style={styles.topRow}>
           <View style={styles.tagContainer}>
-            <Text style={styles.tagText}>{type} whisper</Text>
+            <Text style={styles.tagText}>{isNightWhisperTime ? 'night' : type} whisper</Text>
             <Ionicons
-              name={type === 'morning' ? 'leaf' : 'moon'}
+              name={isNightWhisperTime ? 'moon' : (type === 'morning' ? 'leaf' : 'moon')}
               size={12}
               color={Colors.green.primary}
               style={styles.tagIcon}
@@ -111,14 +123,16 @@ export default function WhisperCard({
         </View>
       </View>
 
-      {/* Modal remains the same */}
+      {/* Reader modal — tap the dark area outside the sheet to dismiss */}
       <Modal visible={modalVisible} transparent={true} animationType="none" onRequestClose={closeModal}>
-        <View style={styles.modalOverlay}>
-          <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={closeModal} />
-          <Animated.View style={[styles.modalContent, { transform: [{ translateY: slideAnim }] }]}>
+        <Pressable style={styles.modalOverlay} onPress={closeModal}>
+          <Animated.View
+            style={[styles.modalContent, { transform: [{ translateY: slideAnim }] }]}
+            onStartShouldSetResponder={() => true}
+          >
             <View style={styles.modalHandle} />
             <Text style={styles.modalTitle}>{title}</Text>
-            <Text style={styles.modalVerse}>"{verse}" — {reference}</Text>
+            <Text style={styles.modalVerse}>"{verse}"{reference ? ` — ${reference}` : ''}</Text>
             <View style={styles.reflectionBox}><Text style={styles.modalReflection}>{reflection}</Text></View>
             <View style={styles.modalActions}>
               <TouchableOpacity style={styles.modalLikeBtn} onPress={() => setIsLoved(!isLoved)}>
@@ -127,7 +141,7 @@ export default function WhisperCard({
               <TouchableOpacity style={styles.modalShareBtn} onPress={handleShare} activeOpacity={0.85}><Text style={styles.modalShareText}>share whisper</Text></TouchableOpacity>
             </View>
           </Animated.View>
-        </View>
+        </Pressable>
       </Modal>
     </>
   );
@@ -158,6 +172,15 @@ const styles = StyleSheet.create({
   watermarkImage: {
     width: 210,
     height: 335,
+  },
+  /* TWEAK THESE VALUES TO MOVE THE CANDLE */
+  candleWatermarkAdjust: {
+    width: 250,        // Increase size
+    height: 350,       // Increase size
+    opacity: 8,      // High visibility (0.0 to 1.0)
+    position: 'absolute',
+    bottom: 7,       // Negative numbers move it DOWN, positive move it UP
+    right: -20,        // Negative numbers move it RIGHT, positive move it LEFT
   },
   topRow: {
     flexDirection: 'row',

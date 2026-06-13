@@ -2,29 +2,72 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 import { Colors, Spacing } from '../constants/theme';
 
 const SUN_IMAGE = require('../../assets/images/sun-glow.png');
+const CANDLE_IMAGE = require('../../assets/images/candle.png');
 
 interface HeroGreetingProps {
   name?: string;
   subtitle?: string;
 }
 
-export default function HeroGreeting({
-  name = 'Mac Divine',
-  subtitle = "be still. you're not alone.",
-}: HeroGreetingProps) {
+type Period = 'morning' | 'afternoon' | 'evening' | 'night';
+
+// Warm, varied greeting phrases per part of day. Each reads naturally with
+// ", {name}" appended — so the greeting feels alive, not robotic.
+const GREETINGS: Record<Period, string[]> = {
+  morning: ['Good morning', 'A gentle morning', 'Grace this morning'],
+  afternoon: ['Good afternoon', 'A calm afternoon', 'Grace this afternoon'],
+  evening: ['Good evening', 'A peaceful evening', 'Grace this evening'],
+  night: ['Good night', 'Rest now', 'Peace tonight'],
+};
+
+// Gentle sub-lines that rotate day to day.
+const SUBTITLES = [
+  "be still. you're not alone.",
+  'you were made to be heard.',
+  'one breath at a time.',
+  "you're safe here.",
+  'He is near to you today.',
+  "rest. you don't have to carry it all.",
+];
+
+function getPeriod(hour: number): Period {
+  if (hour >= 5 && hour < 12) return 'morning';
+  if (hour >= 12 && hour < 17) return 'afternoon';
+  if (hour >= 17 && hour < 21) return 'evening';
+  return 'night';
+}
+
+// Day-of-year seed so the chosen phrases stay stable through the day but
+// change from one day to the next.
+function dayOfYear(): number {
+  const now = new Date();
+  return Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000);
+}
+
+export default function HeroGreeting({ name = 'Mac Divine', subtitle }: HeroGreetingProps) {
+  const hour = new Date().getHours();
+  const period = getPeriod(hour);
+  const seed = dayOfYear();
+
+  const greetingPool = GREETINGS[period];
+  const greeting = greetingPool[seed % greetingPool.length];
+  // Offset the subtitle so it doesn't always pair with the same greeting.
+  const line = subtitle ?? SUBTITLES[(seed + 3) % SUBTITLES.length];
+
+  // Sun by day, candle for the wind-down hours.
+  const isDay = period === 'morning' || period === 'afternoon';
+
   return (
     <View style={styles.container}>
-      {/* Left: Text - Normal weight, Sentence case, Charcoal */}
       <View style={styles.textContainer}>
-        <Text style={styles.greeting}>Good morning, {name}</Text>
-        <Text style={styles.subtitle}>{subtitle}</Text>
+        <Text style={styles.greeting}>{greeting}, {name}</Text>
+        <Text style={styles.subtitle}>{line}</Text>
       </View>
 
       <View style={styles.graphicContainer} pointerEvents="none">
-        {/* EDITABLE SUN IMAGE: Adjust width, height, top, right in styles.sunImage below */}
         <Image
-          source={SUN_IMAGE}
-          style={styles.sunImage}
+          source={isDay ? SUN_IMAGE : CANDLE_IMAGE}
+          style={isDay ? styles.sunImage : styles.candleImage}
           resizeMode="contain"
         />
       </View>
@@ -38,7 +81,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.md,
-    paddingBottom: Spacing.xs, // Reduced padding
+    paddingBottom: Spacing.xs,
     minHeight: 110,
     position: 'relative',
   },
@@ -49,10 +92,10 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   greeting: {
-    fontFamily: 'NotoSerif_400Regular', // Normal weight
-    fontSize: 22, // Reduced font size
-    color: '#333333', // Charcoal
-    lineHeight: 28, // Adjusted line height
+    fontFamily: 'NotoSerif_400Regular',
+    fontSize: 22,
+    color: '#333333',
+    lineHeight: 28,
   },
   subtitle: {
     fontFamily: 'Inter_500Medium',
@@ -66,29 +109,26 @@ const styles = StyleSheet.create({
     top: 0,
     width: 160,
     height: 140,
-    zIndex: -1, // Put it behind the text and cards
+    zIndex: -1,
   },
-  // EDIT THE SUN POSITION AND SIZE HERE
+  // Sun (day)
   sunImage: {
     position: 'absolute',
-
-    // --- 1. MOVE IT ---
-    // Decrease 'top' (e.g., -10) to move UP. Increase (e.g., 20) to move DOWN.
     top: 35,
-    // Decrease 'right' (e.g., 20) to move RIGHT. Increase (e.g., 60) to move LEFT.
     right: 0.7,
-
-    // --- 2. BASE SIZE --- (Best to leave these alone to keep the ratio)
     width: 200,
     height: 120,
-
-    // --- 3. MAKE IT BIGGER/SMALLER ---
-    // Change this number to resize WITHOUT moving it! 
-    // Example: 1.5 is 50% bigger, 0.8 is smaller, 2.0 is double size.
     transform: [{ scale: 3.5 }],
-
-    // --- 4. TRANSPARENCY (OPACITY) ---
-    // 1.0 is fully solid, 0.5 is half see-through, 0.0 is invisible
     opacity: 0.7,
+  },
+  // Candle (evening / night)
+  candleImage: {
+    position: 'absolute',
+    top: 6,
+    right: 24,
+    width: 110,
+    height: 130,
+    transform: [{ scale: 1.15 }],
+    opacity: 0.85,
   },
 });

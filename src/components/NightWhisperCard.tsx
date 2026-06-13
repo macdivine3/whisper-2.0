@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Animated, Dimensions, Easing, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Dimensions, Easing, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Spacing, Radius, Shadows } from '../constants/theme';
@@ -95,9 +95,11 @@ export default function NightWhisperCard({ title, message, whisper, onPress }: N
 
       {/* Reader modal — dark, matching the night theme */}
       <Modal visible={modalVisible} transparent animationType="none" onRequestClose={closeModal}>
-        <View style={styles.modalOverlay}>
-          <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={closeModal} />
-          <Animated.View style={[styles.modalContent, { transform: [{ translateY: slideAnim }] }]}>
+        <Pressable style={styles.modalOverlay} onPress={closeModal}>
+          <Animated.View
+            style={[styles.modalContent, { transform: [{ translateY: slideAnim }] }]}
+            onStartShouldSetResponder={() => true}
+          >
             <LinearGradient
               colors={['#1C2D40', '#1A2438']}
               start={{ x: 0, y: 0 }}
@@ -126,7 +128,7 @@ export default function NightWhisperCard({ title, message, whisper, onPress }: N
               </View>
             </LinearGradient>
           </Animated.View>
-        </View>
+        </Pressable>
       </Modal>
     </>
   );

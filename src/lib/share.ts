@@ -16,16 +16,15 @@ export async function shareText(message: string): Promise<void> {
   }
 }
 
-/** Build the share text for a morning whisper. */
-export function buildMorningWhisperShare(w: {
-  title: string;
-  verse: string;
-  reference?: string;
-  reflection?: string;
-}): string {
+/** Build the share text for a whisper (morning leaf 🌿 or night moon 🌙). */
+export function buildWhisperShare(
+  type: 'morning' | 'night',
+  w: { title: string; verse: string; reference?: string; reflection?: string }
+): string {
+  const emoji = type === 'night' ? '🌙' : '🌿';
   const ref = w.reference ? ` — ${w.reference}` : '';
   const reflection = w.reflection ? `\n\n${w.reflection}` : '';
-  return `${w.title}\n\n"${w.verse}"${ref}${reflection}\n\n🌿 ${SIGN_OFF}`;
+  return `${w.title}\n\n"${w.verse}"${ref}${reflection}\n\n${emoji} ${SIGN_OFF}`;
 }
 
 /** Build the share text for a night whisper. */
