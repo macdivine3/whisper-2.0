@@ -27,6 +27,9 @@ import { morningWhispers, nightWhispers, dailyStories } from '../../data/dailyCo
 // Share helpers
 import { buildStoryShare, shareText } from '../../lib/share';
 
+// Mood logging
+import { logMood } from '../../lib/mood';
+
 export default function HomeScreen() {
   const router = useRouter();
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
@@ -57,8 +60,13 @@ export default function HomeScreen() {
   const handleContinue = () => {
     if (selectedMood) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      // Log the committed mood to the timeline (fire-and-forget) and carry it
+      // into the chat as context for the (future) AI.
+      logMood(selectedMood, 'home');
+      router.push({ pathname: '/whispers', params: { mood: selectedMood } });
+    } else {
+      router.push('/whispers');
     }
-    router.push('/whispers');
   };
 
   return (
@@ -76,22 +84,21 @@ export default function HomeScreen() {
 
         {/* Pulling cards up by using very small vertical margins/spacing */}
         <View style={styles.cardStack}>
-          {/* Whisper Card — same light card design; content + label change by time */}
-          {isMorning ? (
+          {/* Whisper Card — content + label change by time */}
+          {!isMorning ? (
+            <WhisperCard
+              type="night"
+              title={dailyNightWhisper.title}
+              message={dailyNightWhisper.message}
+              whisper={dailyNightWhisper.whisper}
+            />
+          ) : (
             <WhisperCard
               type="morning"
               title={dailyMorningWhisper.title}
               verse={dailyMorningWhisper.verse}
               reference={dailyMorningWhisper.reference}
               reflection={dailyMorningWhisper.reflection}
-            />
-          ) : (
-            <WhisperCard
-              type="night"
-              title={dailyNightWhisper.title}
-              // The short poetic line reads as the quote; the longer message is the reflection.
-              verse={dailyNightWhisper.whisper}
-              reflection={dailyNightWhisper.message}
             />
           )}
 

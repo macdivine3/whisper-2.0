@@ -1,9 +1,12 @@
 // src/lib/journal.ts
-// Journal data layer: the JournalEntry shape, mood styling, and all
-// persistence logic. Screens/components talk to this, never to storage directly.
+// Journal data layer. Cloud-backed (Supabase) with a local AsyncStorage mirror
+// for instant + offline reads, and an offline write queue that flushes when the
+// connection returns. Screens/components call these functions only — they never
+// touch Supabase or storage directly, so the backend can change without UI edits.
 
 import { Colors } from '../constants/theme';
 import { Keys, loadJSON, saveJSON } from './storage';
+import { supabase } from './supabase';
 
 export interface JournalEntry {
   id: string;
@@ -17,8 +20,10 @@ export interface JournalEntry {
   isFavorite?: boolean;
 }
 
-// The moods a journal entry can carry. Colors come from the design system so
-// cards, tags, and icons all stay on-brand.
+// ---------------------------------------------------------------------------
+// Mood styling + small helpers (unchanged public API)
+// ---------------------------------------------------------------------------
+
 export const MOODS = [
   'grateful',
   'hopeful',
@@ -82,8 +87,13 @@ export function moodPrompt(mood: string): string {
   return MOOD_PROMPTS[mood] ?? 'Take a breath. This is your safe place — what\'s on your heart?';
 }
 
-// Seed entries — what a brand-new user sees before they've written anything.
-// These mirror the original mockup so the screen never looks empty on first run.
+// ---------------------------------------------------------------------------
+// Seeds — local-only placeholders for a brand-new user. Never uploaded to the
+// cloud. Cleared the moment the user saves their first real entry (Option A).
+// ---------------------------------------------------------------------------
+
+const SEED_PREFIX = 'seed-';
+
 const SEED_ENTRIES: JournalEntry[] = [
   {
     id: 'seed-1',
@@ -128,18 +138,189 @@ const SEED_ENTRIES: JournalEntry[] = [
   },
 ];
 
-let seeded = false;
+// ---------------------------------------------------------------------------
+// Internal helpers: ids, mapping, session, mirror, offline queue
+// ---------------------------------------------------------------------------
 
-/** Load all entries, newest first. Seeds defaults on the very first run. */
-export async function getEntries(): Promise<JournalEntry[]> {
-  const existing = await loadJSON<JournalEntry[] | null>(Keys.journalEntries, null);
-  if (existing == null && !seeded) {
-    seeded = true;
-    await saveJSON(Keys.journalEntries, SEED_ENTRIES);
-    return [...SEED_ENTRIES];
+/** RFC4122 v4 UUID — so a row gets the same id locally and in the cloud. */
+function uuidv4(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+const sortNewest = (list: JournalEntry[]) =>
+  [...list].sort((a, b) => b.createdAt - a.createdAt);
+
+const isSeed = (id: string) => id.startsWith(SEED_PREFIX);
+
+interface CloudRow {
+  id: string;
+  title: string;
+  body: string;
+  mood: string;
+  is_favorite: boolean;
+  created_at: string;
+}
+
+function rowToEntry(row: CloudRow): JournalEntry {
+  const createdAt = new Date(row.created_at).getTime();
+  return {
+    id: row.id,
+    title: row.title,
+    body: row.body,
+    excerpt: makeExcerpt(row.body),
+    mood: row.mood,
+    color: moodColor(row.mood),
+    createdAt,
+    date: formatDate(createdAt),
+    isFavorite: row.is_favorite,
+  };
+}
+
+function entryToRow(entry: JournalEntry, userId: string) {
+  return {
+    id: entry.id,
+    user_id: userId,
+    title: entry.title,
+    body: entry.body,
+    mood: entry.mood,
+    is_favorite: !!entry.isFavorite,
+    created_at: new Date(entry.createdAt).toISOString(),
+  };
+}
+
+async function currentUserId(): Promise<string | null> {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return user?.id ?? null;
+  } catch {
+    return null;
   }
-  const entries = existing ?? [];
-  return [...entries].sort((a, b) => b.createdAt - a.createdAt);
+}
+
+// Mirror = the last-known list of the user's real entries.
+const readMirror = () => loadJSON<JournalEntry[]>(Keys.journalEntries, []);
+const writeMirror = (list: JournalEntry[]) => saveJSON(Keys.journalEntries, list);
+
+// Offline write queue. Each op replays against Supabase when we're back online.
+type QueueOp =
+  | { op: 'insert'; entry: JournalEntry }
+  | { op: 'update'; id: string; isFavorite: boolean }
+  | { op: 'delete'; id: string };
+
+async function enqueue(op: QueueOp): Promise<void> {
+  const queue = await loadJSON<QueueOp[]>(Keys.journalQueue, []);
+  queue.push(op);
+  await saveJSON(Keys.journalQueue, queue);
+}
+
+async function applyOp(op: QueueOp, userId: string): Promise<boolean> {
+  try {
+    if (op.op === 'insert') {
+      const { error } = await supabase.from('journal_entries').insert(entryToRow(op.entry, userId));
+      return !error;
+    }
+    if (op.op === 'update') {
+      const { error } = await supabase
+        .from('journal_entries')
+        .update({ is_favorite: op.isFavorite, updated_at: new Date().toISOString() })
+        .eq('id', op.id);
+      return !error;
+    }
+    const { error } = await supabase.from('journal_entries').delete().eq('id', op.id);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+/** Replay any queued offline writes. Keeps ops that still fail. */
+async function flushQueue(userId: string): Promise<void> {
+  const queue = await loadJSON<QueueOp[]>(Keys.journalQueue, []);
+  if (!queue.length) return;
+  const remaining: QueueOp[] = [];
+  for (const op of queue) {
+    const ok = await applyOp(op, userId);
+    if (!ok) remaining.push(op);
+  }
+  await saveJSON(Keys.journalQueue, remaining);
+}
+
+/**
+ * One-time migration: push any pre-existing LOCAL entries (from before the
+ * cloud move) up to Supabase. Skips seeds. Runs once a session/user exists.
+ */
+async function migrateOnce(userId: string): Promise<void> {
+  const done = await loadJSON<boolean>(Keys.journalMigrationDone, false);
+  if (done) return;
+
+  const mirror = await readMirror();
+  const realLocal = mirror.filter((e) => !isSeed(e.id));
+
+  for (const e of realLocal) {
+    // Old entries had ids like "entry-123" which aren't valid UUIDs; re-id them.
+    const entry = { ...e, id: uuidv4() };
+    const { error } = await supabase.from('journal_entries').insert(entryToRow(entry, userId));
+    if (error) {
+      // Bail without marking done, so we retry next launch.
+      console.warn('[journal] migration insert failed, will retry', error.message);
+      return;
+    }
+  }
+
+  if (realLocal.length > 0) {
+    // They had real entries, so the demo seeds should never reappear.
+    await saveJSON(Keys.journalSeedsDismissed, true);
+  }
+  await saveJSON(Keys.journalMigrationDone, true);
+}
+
+// ---------------------------------------------------------------------------
+// Public API (same signatures the screens already use)
+// ---------------------------------------------------------------------------
+
+/**
+ * Load all entries, newest first.
+ * - Online: pulls from Supabase (source of truth) and refreshes the mirror.
+ * - Offline: returns the local mirror instantly.
+ * - Brand-new user with nothing in the cloud: shows seeds until their first save.
+ */
+export async function getEntries(): Promise<JournalEntry[]> {
+  const userId = await currentUserId();
+
+  // Online path: sync up (migration + queue) then pull down.
+  if (userId) {
+    await migrateOnce(userId);
+    await flushQueue(userId);
+
+    const { data, error } = await supabase
+      .from('journal_entries')
+      .select('id, title, body, mood, is_favorite, created_at')
+      .order('created_at', { ascending: false });
+
+    if (!error && data) {
+      const entries = (data as CloudRow[]).map(rowToEntry);
+      await writeMirror(entries);
+      if (entries.length > 0) return entries;
+
+      // Cloud empty — maybe a fresh user: show seeds unless already dismissed.
+      const dismissed = await loadJSON<boolean>(Keys.journalSeedsDismissed, false);
+      return dismissed ? [] : sortNewest(SEED_ENTRIES);
+    }
+    // fall through to offline path on error
+  }
+
+  // Offline path: use the mirror; seed a fresh user.
+  const mirror = await readMirror();
+  if (mirror.length > 0) return sortNewest(mirror);
+
+  const dismissed = await loadJSON<boolean>(Keys.journalSeedsDismissed, false);
+  return dismissed ? [] : sortNewest(SEED_ENTRIES);
 }
 
 /** Create and persist a new entry. Returns the saved entry. */
@@ -150,8 +331,7 @@ export async function addEntry(input: {
 }): Promise<JournalEntry> {
   const now = Date.now();
   const entry: JournalEntry = {
-    id: `entry-${now}`,
-    // Auto time-of-day title (Option A) when the user leaves it blank.
+    id: uuidv4(),
     title: input.title.trim() || timeOfDayTitle(now),
     body: input.body.trim(),
     excerpt: makeExcerpt(input.body),
@@ -161,25 +341,63 @@ export async function addEntry(input: {
     date: formatDate(now),
     isFavorite: false,
   };
-  const entries = await loadJSON<JournalEntry[]>(Keys.journalEntries, []);
-  await saveJSON(Keys.journalEntries, [entry, ...entries]);
+
+  // First real save clears the demo seeds, forever (Option A).
+  await saveJSON(Keys.journalSeedsDismissed, true);
+  const mirror = (await readMirror()).filter((e) => !isSeed(e.id));
+  await writeMirror([entry, ...mirror]);
+
+  // Push to cloud, or queue it for later if offline.
+  const userId = await currentUserId();
+  if (userId) {
+    const { error } = await supabase.from('journal_entries').insert(entryToRow(entry, userId));
+    if (error) await enqueue({ op: 'insert', entry });
+  } else {
+    await enqueue({ op: 'insert', entry });
+  }
+
   return entry;
 }
 
-/** Flip the favorite flag on one entry and persist. Returns updated list. */
+/** Flip the favorite flag on one entry. Returns the updated list (newest first). */
 export async function toggleFavorite(id: string): Promise<JournalEntry[]> {
-  const entries = await loadJSON<JournalEntry[]>(Keys.journalEntries, []);
-  const next = entries.map((e) =>
-    e.id === id ? { ...e, isFavorite: !e.isFavorite } : e
-  );
-  await saveJSON(Keys.journalEntries, next);
-  return next.sort((a, b) => b.createdAt - a.createdAt);
+  const mirror = await readMirror();
+  const target = mirror.find((e) => e.id === id);
+  const nextFav = target ? !target.isFavorite : true;
+  const next = mirror.map((e) => (e.id === id ? { ...e, isFavorite: nextFav } : e));
+  await writeMirror(next);
+
+  // Seeds aren't real rows — only sync genuine entries.
+  if (!isSeed(id)) {
+    const userId = await currentUserId();
+    if (userId) {
+      const { error } = await supabase
+        .from('journal_entries')
+        .update({ is_favorite: nextFav, updated_at: new Date().toISOString() })
+        .eq('id', id);
+      if (error) await enqueue({ op: 'update', id, isFavorite: nextFav });
+    } else {
+      await enqueue({ op: 'update', id, isFavorite: nextFav });
+    }
+  }
+
+  return sortNewest(next);
 }
 
 /** Permanently remove an entry. Returns the updated list (newest first). */
 export async function deleteEntry(id: string): Promise<JournalEntry[]> {
-  const entries = await loadJSON<JournalEntry[]>(Keys.journalEntries, []);
-  const next = entries.filter((e) => e.id !== id);
-  await saveJSON(Keys.journalEntries, next);
-  return next.sort((a, b) => b.createdAt - a.createdAt);
+  const next = (await readMirror()).filter((e) => e.id !== id);
+  await writeMirror(next);
+
+  if (!isSeed(id)) {
+    const userId = await currentUserId();
+    if (userId) {
+      const { error } = await supabase.from('journal_entries').delete().eq('id', id);
+      if (error) await enqueue({ op: 'delete', id });
+    } else {
+      await enqueue({ op: 'delete', id });
+    }
+  }
+
+  return sortNewest(next);
 }

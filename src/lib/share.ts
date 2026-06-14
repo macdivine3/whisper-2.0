@@ -19,12 +19,27 @@ export async function shareText(message: string): Promise<void> {
 /** Build the share text for a whisper (morning leaf 🌿 or night moon 🌙). */
 export function buildWhisperShare(
   type: 'morning' | 'night',
-  w: { title: string; verse: string; reference?: string; reflection?: string }
+  w: {
+    title?: string;
+    verse?: string;
+    reference?: string;
+    reflection?: string;
+    message?: string;
+    whisper?: string;
+  }
 ): string {
   const emoji = type === 'night' ? '🌙' : '🌿';
+  const title = w.title ?? '';
+
+  if (type === 'night') {
+    const body = w.message ? `${w.message}\n\n` : '';
+    const quote = w.whisper ? `"${w.whisper}"\n\n` : '';
+    return `${title}\n\n${body}${quote}${emoji} ${SIGN_OFF}`;
+  }
+
   const ref = w.reference ? ` — ${w.reference}` : '';
   const reflection = w.reflection ? `\n\n${w.reflection}` : '';
-  return `${w.title}\n\n"${w.verse}"${ref}${reflection}\n\n${emoji} ${SIGN_OFF}`;
+  return `${title}\n\n"${w.verse ?? ''}"${ref}${reflection}\n\n${emoji} ${SIGN_OFF}`;
 }
 
 /** Build the share text for a night whisper. */

@@ -17,6 +17,8 @@ import {
     NotoSerif_700Bold,
 } from "@expo-google-fonts/noto-serif";
 
+import { ensureSession } from "../lib/supabase";
+
 SplashScreen.preventAutoHideAsync();
 
 const ONBOARDING_KEY = "whisper_onboarding_complete";
@@ -42,6 +44,12 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded, error]);
+
+  // Make sure this device has an (anonymous) Supabase session, in the
+  // background. Doesn't block the UI from rendering.
+  useEffect(() => {
+    ensureSession();
+  }, []);
 
   // Check onboarding status after fonts are ready
   useEffect(() => {

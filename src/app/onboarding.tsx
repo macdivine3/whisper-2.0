@@ -1,21 +1,21 @@
-import React, { useRef, useEffect } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import { useEffect, useRef } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
   Animated,
   Dimensions,
   Platform,
   StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LinearGradient } from 'expo-linear-gradient';
-import Svg, { Circle, Path, G, Ellipse, Defs, RadialGradient, Stop } from 'react-native-svg';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Radius, Shadows, CommonStyles } from '../constants/theme';
+import Svg, { Defs, Ellipse, G, Path, RadialGradient, Stop } from 'react-native-svg';
+import { Colors, Radius, Shadows, Spacing } from '../constants/theme';
 
 const { width, height } = Dimensions.get('window');
 
@@ -162,9 +162,9 @@ export default function OnboardingScreen() {
           <View style={styles.featureList}>
             {[
               { icon: 'chatbubble-ellipses-outline', text: 'Talk to Whisper, your AI companion' },
-              { icon: 'book-outline',                text: 'Journal your heart and daily stories' },
-              { icon: 'heart-outline',               text: 'Pray together with the community' },
-              { icon: 'leaf-outline',                text: 'Daily morning & night devotions' },
+              { icon: 'book-outline', text: 'Journal your heart and daily stories' },
+              { icon: 'heart-outline', text: 'Pray together with Whisper' },
+              { icon: 'leaf-outline', text: 'Daily morning & night devotions' },
             ].map((f) => (
               <View key={f.text} style={styles.featureRow}>
                 <View style={styles.featureIconBox}>

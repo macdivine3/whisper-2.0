@@ -9,9 +9,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // collide and can see the whole storage surface at a glance.
 export const Keys = {
   onboardingComplete: 'whisper_onboarding_complete',
-  journalEntries: 'whisper_journal_entries',
+  journalEntries: 'whisper_journal_entries',        // local mirror of cloud entries
+  journalQueue: 'whisper_journal_queue',            // offline write queue
+  journalSeedsDismissed: 'whisper_journal_seeds_dismissed',
+  journalMigrationDone: 'whisper_journal_migration_done',
   moodLog: 'whisper_mood_log',
-  chatHistory: 'whisper_chat_history',
+  chatSessions: 'whisper_chat_sessions',          // local mirror of sessions
+  chatMessages: 'whisper_chat_messages',          // local mirror: { [sessionId]: ChatMessage[] }
+  chatQueue: 'whisper_chat_queue',                // offline write queue
 } as const;
 
 /** Read and JSON-parse a value. Returns `fallback` if missing or on error. */

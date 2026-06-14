@@ -11,18 +11,24 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 interface WhisperCardProps {
   type?: 'morning' | 'night';
   title?: string;
+  // Morning specific
   verse?: string;
   reference?: string;
   reflection?: string;
+  // Night specific
+  message?: string;
+  whisper?: string;
   onReadPress?: () => void;
 }
 
 export default function WhisperCard({
   type = 'morning',
   title = 'He Heals',
-  verse = 'He heals the brokenhearted and binds up their wounds.',
-  reference = 'Psalm 147:3',
-  reflection = 'Sometimes the broken pieces of our lives are exactly what God uses to let His light shine through. Be patient with your healing today.',
+  verse,
+  reference,
+  reflection,
+  message,
+  whisper,
   onReadPress,
 }: WhisperCardProps) {
   const [isLoved, setIsLoved] = useState(false);
@@ -32,10 +38,11 @@ export default function WhisperCard({
   // Logic to determine if we should show the candle
   const currentHour = new Date().getHours();
   // SET THIS TO 'true' IF YOU WANT TO SEE THE CANDLE RIGHT NOW REGARDLESS OF TIME
-  const FORCE_NIGHT_MODE = false;
+  const FORCE_NIGHT_MODE = false; 
 
   const isNightWhisperTime = FORCE_NIGHT_MODE || (currentHour >= 18 || currentHour < 8); // 6 PM to 7:59 AM
   const activeBackground = isNightWhisperTime ? CANDLE_BG : LEAF_BG;
+  const activeType = isNightWhisperTime ? 'night' : type;
 
   const openModal = () => {
     setModalVisible(true);
@@ -67,7 +74,7 @@ export default function WhisperCard({
   };
 
   const handleShare = () =>
-    shareText(buildWhisperShare(type, { title, verse, reference, reflection }));
+    shareText(buildWhisperShare(activeType, { title, verse, reference, reflection, message, whisper }));
 
   return (
     <>
@@ -87,9 +94,9 @@ export default function WhisperCard({
         {/* Top Row */}
         <View style={styles.topRow}>
           <View style={styles.tagContainer}>
-            <Text style={styles.tagText}>{isNightWhisperTime ? 'night' : type} whisper</Text>
+            <Text style={styles.tagText}>{activeType} whisper</Text>
             <Ionicons
-              name={isNightWhisperTime ? 'moon' : (type === 'morning' ? 'leaf' : 'moon')}
+              name={activeType === 'morning' ? 'leaf' : 'moon'}
               size={12}
               color={Colors.green.primary}
               style={styles.tagIcon}
@@ -109,10 +116,16 @@ export default function WhisperCard({
           <Text style={styles.title} numberOfLines={1}>{title}</Text>
 
           <View style={styles.verseWrapper}>
-            <Text style={styles.verse}>
-              {verse}
-              {reference ? <Text style={styles.reference}> {reference}.</Text> : null}
-            </Text>
+            {activeType === 'morning' ? (
+              <Text style={styles.verse}>
+                {verse}
+                {reference ? <Text style={styles.reference}> {reference}.</Text> : null}
+              </Text>
+            ) : (
+              <Text style={styles.verse} numberOfLines={2}>
+                {message}
+              </Text>
+            )}
           </View>
 
           {/* Read link */}
@@ -132,13 +145,37 @@ export default function WhisperCard({
           >
             <View style={styles.modalHandle} />
             <Text style={styles.modalTitle}>{title}</Text>
-            <Text style={styles.modalVerse}>"{verse}"{reference ? ` — ${reference}` : ''}</Text>
-            <View style={styles.reflectionBox}><Text style={styles.modalReflection}>{reflection}</Text></View>
+
+            {activeType === 'morning' ? (
+              <>
+                <Text style={styles.modalVerse}>"{verse}"{reference ? ` — ${reference}` : ''}</Text>
+                <View style={styles.reflectionBox}>
+                  <Text style={styles.modalReflection}>{reflection}</Text>
+                </View>
+              </>
+            ) : (
+              <>
+                <View style={styles.messageBox}>
+                  <Text style={styles.modalMessage}>{message}</Text>
+                </View>
+
+                <View style={styles.whisperContainer}>
+                  <View style={styles.whisperHeader}>
+                    <Ionicons name="leaf" size={12} color={Colors.green.secondary} />
+                    <Text style={styles.whisperLabel}>whisper this to yourself</Text>
+                  </View>
+                  <Text style={styles.whisperText}>"{whisper}"</Text>
+                </View>
+              </>
+            )}
+
             <View style={styles.modalActions}>
               <TouchableOpacity style={styles.modalLikeBtn} onPress={() => setIsLoved(!isLoved)}>
                 <Ionicons name={isLoved ? 'heart' : 'heart-outline'} size={24} color={isLoved ? '#E07B7B' : Colors.text.primary} />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.modalShareBtn} onPress={handleShare} activeOpacity={0.85}><Text style={styles.modalShareText}>share whisper</Text></TouchableOpacity>
+              <TouchableOpacity style={styles.modalShareBtn} onPress={handleShare} activeOpacity={0.85}>
+                <Text style={styles.modalShareText}>share whisper</Text>
+              </TouchableOpacity>
             </View>
           </Animated.View>
         </Pressable>
@@ -177,7 +214,7 @@ const styles = StyleSheet.create({
   candleWatermarkAdjust: {
     width: 250,        // Increase size
     height: 350,       // Increase size
-    opacity: 8,      // High visibility (0.0 to 1.0)
+    opacity: 0.8,      // Fixed typo (was 8)
     position: 'absolute',
     bottom: 7,       // Negative numbers move it DOWN, positive move it UP
     right: -20,        // Negative numbers move it RIGHT, positive move it LEFT
@@ -244,6 +281,44 @@ const styles = StyleSheet.create({
   modalVerse: { fontFamily: 'NotoSerif_400Regular_Italic', fontSize: 14, color: Colors.text.muted, marginBottom: 16 },
   reflectionBox: { backgroundColor: Colors.bg.card, padding: 16, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.border.soft, marginBottom: 20 },
   modalReflection: { fontFamily: 'Inter_400Regular', fontSize: 14, color: Colors.text.secondary, lineHeight: 22 },
+  messageBox: {
+    marginBottom: 20,
+  },
+  modalMessage: {
+    fontFamily: 'NotoSerif_400Regular',
+    fontSize: 16,
+    color: Colors.text.primary,
+    lineHeight: 24,
+  },
+  whisperContainer: {
+    backgroundColor: '#F8F5F0',
+    padding: 20,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: '#E8E2D8',
+    marginBottom: 24,
+  },
+  whisperHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 12,
+  },
+  whisperLabel: {
+    fontFamily: 'Inter_700Bold',
+    fontSize: 10,
+    color: Colors.green.secondary,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  whisperText: {
+    fontFamily: 'NotoSerif_400Regular_Italic',
+    fontSize: 18,
+    color: Colors.text.primary,
+    lineHeight: 26,
+    fontStyle: 'italic',
+    textAlign: 'center',
+  },
   modalActions: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   modalLikeBtn: { width: 50, height: 50, borderRadius: 25, backgroundColor: Colors.bg.card, borderWidth: 1, borderColor: Colors.border.soft, justifyContent: 'center', alignItems: 'center' },
   modalShareBtn: { flex: 1, height: 50, backgroundColor: Colors.green.primary, borderRadius: Radius.pill, justifyContent: 'center', alignItems: 'center' },

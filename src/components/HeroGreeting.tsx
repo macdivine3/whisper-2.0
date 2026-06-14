@@ -2,7 +2,8 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 import { Colors, Spacing } from '../constants/theme';
 
 const SUN_IMAGE = require('../../assets/images/sun-glow.png');
-const CANDLE_IMAGE = require('../../assets/images/candle.png');
+const CANDLE_IMAGE = require('../../svjs/candle-Photoroom.png');
+const BULB_IMAGE = require('../../svjs/Gemini_Generated_Image_x8cy4kx8cy4kx8cy-Photoroom.png');
 
 interface HeroGreetingProps {
   name?: string;
@@ -49,13 +50,21 @@ export default function HeroGreeting({ name = 'Mac Divine', subtitle }: HeroGree
   const period = getPeriod(hour);
   const seed = dayOfYear();
 
+  // SET THESE TO 'true' TO TEST NIGHT MODE OR BULB DISPLAY
+  const FORCE_NIGHT = false; 
+  const FORCE_BULB = false;
+
   const greetingPool = GREETINGS[period];
   const greeting = greetingPool[seed % greetingPool.length];
   // Offset the subtitle so it doesn't always pair with the same greeting.
   const line = subtitle ?? SUBTITLES[(seed + 3) % SUBTITLES.length];
 
-  // Sun by day, candle for the wind-down hours.
-  const isDay = period === 'morning' || period === 'afternoon';
+  // Sun by day, candle/bulb for the wind-down hours.
+  const isNight = FORCE_NIGHT || (period === 'evening' || period === 'night');
+
+  // Alternating logic: Bulb on even days, Candle on odd days
+  const isBulbDay = FORCE_BULB || seed % 2 === 0;
+  const nightSource = isBulbDay ? BULB_IMAGE : CANDLE_IMAGE;
 
   return (
     <View style={styles.container}>
@@ -66,8 +75,12 @@ export default function HeroGreeting({ name = 'Mac Divine', subtitle }: HeroGree
 
       <View style={styles.graphicContainer} pointerEvents="none">
         <Image
-          source={isDay ? SUN_IMAGE : CANDLE_IMAGE}
-          style={isDay ? styles.sunImage : styles.candleImage}
+          source={isNight ? nightSource : SUN_IMAGE}
+          style={
+            !isNight
+              ? styles.sunImage
+              : (isBulbDay ? styles.bulbImage : styles.candleImage)
+          }
           resizeMode="contain"
         />
       </View>
@@ -93,7 +106,7 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontFamily: 'NotoSerif_400Regular',
-    fontSize: 22,
+    fontSize: 19,
     color: '#333333',
     lineHeight: 28,
   },
@@ -121,7 +134,7 @@ const styles = StyleSheet.create({
     transform: [{ scale: 3.5 }],
     opacity: 0.7,
   },
-  // Candle (evening / night)
+  // Candle (night option A)
   candleImage: {
     position: 'absolute',
     top: 6,
@@ -130,5 +143,15 @@ const styles = StyleSheet.create({
     height: 130,
     transform: [{ scale: 1.15 }],
     opacity: 0.85,
+  },
+  // Bulb (night option B)
+  bulbImage: {
+    position: 'absolute',
+    top: 10,       // NEGATIVE moves it UP, POSITIVE moves it DOWN
+    right: 20,     // HIGHER moves it LEFT, LOWER moves it RIGHT
+    width: 100,    // INCREASE to make BIGGER
+    height: 120,   // INCREASE to make BIGGER
+    opacity: 0.55, // 0.0 to 1.0 (Visibility)
+    transform: [{ scale: 1.2 }], // Scaling without moving
   },
 });

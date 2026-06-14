@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -9,114 +9,120 @@ import {
   KeyboardAvoidingView,
   Platform,
   StatusBar,
+  Modal,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import TypingIndicator from '../../components/TypingIndicator';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Colors, Spacing, Radius, Shadows } from '../../constants/theme';
 
-// Import Components
+// Components
 import ChatBubble from '../../components/ChatBubble';
 import AIMessage from '../../components/AIMessage';
 import ScriptureCard from '../../components/ScriptureCard';
-import ReactionBar from '../../components/ReactionBar';
+import PrayerCard from '../../components/PrayerCard';
+import TypingIndicator from '../../components/TypingIndicator';
 
-interface Message {
-  id: string;
-  type: 'ai' | 'user' | 'scripture' | 'reaction';
-  text?: string;
-  time: string;
-  senderName?: string;
-  showLeaf?: boolean;
-  verse?: string;
-  reference?: string;
+// Data + voice
+import {
+  ChatMessage,
+  ChatSession,
+  createSession,
+  addMessage,
+  getSessions,
+  getMessages,
+} from '../../lib/chat';
+import { getOpener, getWhisperReply } from '../../lib/whisperVoice';
+import { getPrayer, Prayer } from '../../lib/prayers';
+
+function formatTime(ts: number): string {
+  return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 export default function WhispersScreen() {
   const router = useRouter();
-  const scrollViewRef = useRef<ScrollView>(null);
-  const [inputText, setInputText] = useState('');
+  const { mood } = useLocalSearchParams<{ mood?: string }>();
+  const scrollRef = useRef<ScrollView>(null);
+  const initialized = useRef(false);
+
+  const [session, setSession] = useState<ChatSession | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  
-  // Set up the exact visual conversation mock from your UI design
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 'm1',
-      type: 'ai',
-      text: "good morning, David 🌿\n\nI'm here for you.\nHow are you feeling today?",
-      time: '9:41 AM',
-      showLeaf: true,
-    },
-    {
-      id: 'm2',
-      type: 'user',
-      text: 'Honestly, overwhelmed.',
-      time: '9:42 AM',
-    },
-    {
-      id: 'm3',
-      type: 'ai',
-      text: "Thank you for being honest.\nIt takes courage to say that.\n\nWould you like to talk about what's been on your mind? I'm listening.",
-      time: '9:42 AM',
-    },
-    {
-      id: 'm4',
-      type: 'user',
-      text: "Everything just feels like too much.\nI feel like I'm failing in so many areas of my life.",
-      time: '9:43 AM',
-    },
-    {
-      id: 'm5',
-      type: 'ai',
-      text: "I hear you, David.\nYou are not failing. You're human.\nAnd even on your hardest days, you are still showing up. That matters.\n\nRemember: God sees your heart, not your highlights.",
-      time: '9:43 AM',
-    },
-    {
-      id: 'm6',
-      type: 'scripture',
-      verse: 'Cast all your anxiety on Him because He cares for you.',
-      reference: '1 Peter 5:7',
-      time: '9:43 AM',
-    },
-    {
-      id: 'm7',
-      type: 'reaction',
-      time: '9:43 AM',
-    }
-  ]);
 
-  const handleSend = () => {
-    if (!inputText.trim()) return;
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [pastSessions, setPastSessions] = useState<ChatSession[]>([]);
 
-    const newMsgId = `user-${Date.now()}`;
-    const userMsg: Message = {
-      id: newMsgId,
-      type: 'user',
-      text: inputText,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    };
-
-    setMessages((prev) => [...prev, userMsg]);
-    setInputText('');
-    setIsTyping(true);
-    setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
-
-    // Simulate AI response after typing delay
-    setTimeout(() => {
-      setIsTyping(false);
-      const aiResponse: Message = {
-        id: `ai-${Date.now()}`,
-        type: 'ai',
-        text: "I hear you completely. Take a deep breath. You don't have to walk this mile alone. Whisper is here, and so is His grace.",
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      };
-      setMessages((prev) => [...prev, aiResponse]);
-      scrollViewRef.current?.scrollToEnd({ animated: true });
-    }, 1600);
-
-
+  // --- start a brand-new conversation with the mood-aware opener ----------
+  const startNewSession = async (openingMood?: string | null) => {
+    const s = await createSession(openingMood);
+    const opener = await addMessage(s.id, 'whisper', getOpener(openingMood));
+    setSession(s);
+    setMessages([opener]);
   };
+
+  // First mount: open a fresh session using the mood we arrived with.
+  useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+    startNewSession(mood ?? null);
+  }, []);
+
+  const scrollToEnd = () =>
+    setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 60);
+
+  // --- send a message -----------------------------------------------------
+  const handleSend = async () => {
+    const text = input.trim();
+    if (!text || !session) return;
+    setInput('');
+
+    const userMsg = await addMessage(session.id, 'user', text);
+    setMessages((prev) => [...prev, userMsg]);
+    setIsTyping(true);
+    scrollToEnd();
+
+    const reply = await getWhisperReply([...messages, userMsg], session.openingMood);
+    // Unhurried: let the typing dots breathe before the reply lands.
+    setTimeout(async () => {
+      const wMsg = await addMessage(session.id, 'whisper', reply);
+      setIsTyping(false);
+      setMessages((prev) => [...prev, wMsg]);
+      scrollToEnd();
+    }, 1500);
+  };
+
+  // --- offer a prayer (user-triggered in L1; Claude-triggered in L2) ------
+  const handlePray = async () => {
+    if (!session) return;
+    const prayer = getPrayer(session.openingMood);
+    const pMsg = await addMessage(session.id, 'prayer', undefined, prayer);
+    setMessages((prev) => [...prev, pMsg]);
+    scrollToEnd();
+  };
+
+  // --- past chats menu ----------------------------------------------------
+  const openMenu = async () => {
+    setMenuOpen(true);
+    setPastSessions(await getSessions());
+  };
+
+  const openPast = async (s: ChatSession) => {
+    setMenuOpen(false);
+    const msgs = await getMessages(s.id);
+    setSession(s);
+    setMessages(msgs);
+    scrollToEnd();
+  };
+
+  const handleNewChat = async () => {
+    setMenuOpen(false);
+    await startNewSession(null);
+  };
+
+  const lastIsWhisper =
+    messages.length > 0 && messages[messages.length - 1].role === 'whisper';
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -124,81 +130,79 @@ export default function WhispersScreen() {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
-        {/* Custom Header */}
+        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.6}>
             <Ionicons name="chevron-back" size={24} color={Colors.text.secondary} />
           </TouchableOpacity>
-          
+
           <View style={styles.headerTitleContainer}>
             <Text style={styles.logo}>whisper.</Text>
             <Text style={styles.tagline}>your safe sanctuary</Text>
           </View>
 
           <View style={styles.rightHeaderActions}>
-            <TouchableOpacity style={styles.whatIsBtn} activeOpacity={0.7}>
-              <Text style={styles.whatIsText}>what is whisper?</Text>
-              <Ionicons name="leaf" size={10} color={Colors.green.secondary} />
+            <TouchableOpacity style={styles.whatIsBtn} activeOpacity={0.7} onPress={handleNewChat}>
+              <Text style={styles.whatIsText}>new chat</Text>
+              <Ionicons name="add" size={11} color={Colors.green.secondary} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.moreBtn} activeOpacity={0.6}>
+            <TouchableOpacity style={styles.moreBtn} activeOpacity={0.6} onPress={openMenu}>
               <Ionicons name="ellipsis-vertical" size={18} color={Colors.text.secondary} />
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Message Thread */}
+        {/* Message thread */}
         <ScrollView
-          ref={scrollViewRef}
+          ref={scrollRef}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
-          onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: false })}
+          onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}
         >
-          {/* Centered Date Separator */}
           <View style={styles.dateSeparatorContainer}>
             <View style={styles.dateSeparatorPill}>
-              <Text style={styles.dateSeparatorText}>Today, May 18</Text>
+              <Text style={styles.dateSeparatorText}>today</Text>
             </View>
           </View>
 
-          {messages.map((msg) => {
-            if (msg.type === 'ai') {
+          {messages.map((msg, i) => {
+            if (msg.role === 'user') {
+              return <ChatBubble key={msg.id} message={msg.text || ''} time={formatTime(msg.createdAt)} />;
+            }
+            if (msg.role === 'whisper') {
               return (
                 <AIMessage
                   key={msg.id}
                   message={msg.text || ''}
-                  time={msg.time}
-                  showDecorativeLeaf={msg.showLeaf}
+                  time={formatTime(msg.createdAt)}
+                  showDecorativeLeaf={i === 0}
                 />
               );
-            } else if (msg.type === 'user') {
+            }
+            if (msg.role === 'scripture') {
               return (
-                <ChatBubble
-                  key={msg.id}
-                  message={msg.text || ''}
-                  time={msg.time}
-                />
+                <ScriptureCard key={msg.id} verse={msg.meta?.verse} reference={msg.meta?.reference} />
               );
-            } else if (msg.type === 'scripture') {
-              return (
-                <ScriptureCard
-                  key={msg.id}
-                  verse={msg.verse}
-                  reference={msg.reference}
-                />
-              );
-            } else if (msg.type === 'reaction') {
-              return <ReactionBar key={msg.id} />;
+            }
+            if (msg.role === 'prayer') {
+              return <PrayerCard key={msg.id} prayer={msg.meta as Prayer} />;
             }
             return null;
           })}
 
-          {/* Typing indicator — shown while AI is composing */}
           {isTyping && <TypingIndicator />}
+
+          {/* Gentle prayer invitation after Whisper speaks */}
+          {lastIsWhisper && !isTyping && (
+            <TouchableOpacity style={styles.prayPill} onPress={handlePray} activeOpacity={0.8}>
+              <Ionicons name="leaf" size={13} color={Colors.green.primary} />
+              <Text style={styles.prayPillText}>pray with this</Text>
+            </TouchableOpacity>
+          )}
         </ScrollView>
 
-        {/* Input Footer Bar */}
+        {/* Input bar */}
         <View style={styles.footer}>
           <View style={styles.inputContainer}>
             <Ionicons name="leaf-outline" size={18} color={Colors.green.secondary} style={styles.inputLeaf} />
@@ -206,18 +210,15 @@ export default function WhispersScreen() {
               style={styles.textInput}
               placeholder="message whisper..."
               placeholderTextColor={Colors.text.muted}
-              value={inputText}
-              onChangeText={setInputText}
+              value={input}
+              onChangeText={setInput}
               onSubmitEditing={handleSend}
               returnKeyType="send"
             />
-            <TouchableOpacity 
-              style={[
-                styles.sendButton,
-                { backgroundColor: inputText.trim() ? Colors.green.primary : Colors.green.muted }
-              ]} 
+            <TouchableOpacity
+              style={[styles.sendButton, { backgroundColor: input.trim() ? Colors.green.primary : Colors.green.muted }]}
               onPress={handleSend}
-              disabled={!inputText.trim()}
+              disabled={!input.trim()}
               activeOpacity={0.8}
             >
               <Ionicons name="arrow-up" size={18} color={Colors.white} />
@@ -225,6 +226,44 @@ export default function WhispersScreen() {
           </View>
         </View>
       </KeyboardAvoidingView>
+
+      {/* Past conversations menu */}
+      <Modal visible={menuOpen} transparent animationType="fade" onRequestClose={() => setMenuOpen(false)}>
+        <Pressable style={styles.menuOverlay} onPress={() => setMenuOpen(false)}>
+          <Pressable style={styles.menuPanel} onStartShouldSetResponder={() => true}>
+            <View style={styles.menuHeader}>
+              <Text style={styles.menuTitle}>your conversations</Text>
+              <TouchableOpacity onPress={handleNewChat} style={styles.newChatBtn} activeOpacity={0.8}>
+                <Ionicons name="add" size={15} color={Colors.white} />
+                <Text style={styles.newChatText}>new</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
+              {pastSessions.length === 0 ? (
+                <Text style={styles.menuEmpty}>No past conversations yet.</Text>
+              ) : (
+                pastSessions.map((s) => (
+                  <TouchableOpacity
+                    key={s.id}
+                    style={[styles.sessionRow, session?.id === s.id && styles.sessionRowActive]}
+                    onPress={() => openPast(s)}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="chatbubble-ellipses-outline" size={16} color={Colors.green.secondary} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.sessionTitle} numberOfLines={1}>{s.title}</Text>
+                      <Text style={styles.sessionDate}>
+                        {new Date(s.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ))
+              )}
+            </ScrollView>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -248,12 +287,8 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border.soft,
     backgroundColor: Colors.bg.primary,
   },
-  backBtn: {
-    padding: 4,
-  },
-  headerTitleContainer: {
-    alignItems: 'center',
-  },
+  backBtn: { padding: 4 },
+  headerTitleContainer: { alignItems: 'center' },
   logo: {
     fontFamily: 'NotoSerif_700Bold',
     fontSize: 18,
@@ -266,10 +301,7 @@ const styles = StyleSheet.create({
     marginTop: -2,
     letterSpacing: 0.1,
   },
-  rightHeaderActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+  rightHeaderActions: { flexDirection: 'row', alignItems: 'center' },
   whatIsBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -285,18 +317,13 @@ const styles = StyleSheet.create({
     color: Colors.text.secondary,
     marginRight: 4,
   },
-  moreBtn: {
-    padding: 4,
-  },
+  moreBtn: { padding: 4 },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 110, // Avoid overlapping the input bar and tabs
+    paddingBottom: 110,
     paddingTop: Spacing.md,
   },
-  dateSeparatorContainer: {
-    alignItems: 'center',
-    marginVertical: Spacing.sm,
-  },
+  dateSeparatorContainer: { alignItems: 'center', marginVertical: Spacing.sm },
   dateSeparatorPill: {
     backgroundColor: Colors.bg.secondary,
     borderRadius: Radius.pill,
@@ -308,10 +335,28 @@ const styles = StyleSheet.create({
     fontSize: 9,
     color: Colors.text.muted,
   },
+  prayPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'center',
+    backgroundColor: Colors.green.faint,
+    borderWidth: 1,
+    borderColor: Colors.green.muted,
+    borderRadius: Radius.pill,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    marginTop: Spacing.sm,
+  },
+  prayPillText: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 12,
+    color: Colors.green.primary,
+  },
   footer: {
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.xs,
-    paddingBottom: Platform.OS === 'ios' ? 24 : 16, // Reduced since tab bar is hidden
+    paddingBottom: Platform.OS === 'ios' ? 24 : 16,
     backgroundColor: Colors.bg.primary,
   },
   inputContainer: {
@@ -323,12 +368,9 @@ const styles = StyleSheet.create({
     borderColor: Colors.border.soft,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 6,
-    ...Shadows.float, // Outward feeling shadow
+    ...Shadows.float,
   },
-  inputLeaf: {
-    marginLeft: 6,
-    marginRight: 6,
-  },
+  inputLeaf: { marginLeft: 6, marginRight: 6 },
   textInput: {
     flex: 1,
     fontFamily: 'Inter_400Regular',
@@ -342,5 +384,79 @@ const styles = StyleSheet.create({
     borderRadius: Radius.circle,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+
+  // Past chats menu
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    paddingTop: Platform.OS === 'ios' ? 90 : 60,
+    paddingRight: Spacing.md,
+  },
+  menuPanel: {
+    width: 280,
+    backgroundColor: Colors.bg.card,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.border.default,
+    ...Shadows.float,
+  },
+  menuHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
+  menuTitle: {
+    fontFamily: 'Inter_700Bold',
+    fontSize: 12,
+    letterSpacing: 0.5,
+    color: Colors.text.primary,
+  },
+  newChatBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: Colors.green.primary,
+    borderRadius: Radius.pill,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  newChatText: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 11,
+    color: Colors.white,
+  },
+  menuEmpty: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 12,
+    color: Colors.text.muted,
+    textAlign: 'center',
+    paddingVertical: Spacing.lg,
+  },
+  sessionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: Radius.md,
+  },
+  sessionRowActive: {
+    backgroundColor: Colors.green.faint,
+  },
+  sessionTitle: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 13,
+    color: Colors.text.primary,
+  },
+  sessionDate: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 10,
+    color: Colors.text.muted,
+    marginTop: 1,
   },
 });
