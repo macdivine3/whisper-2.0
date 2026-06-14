@@ -53,6 +53,7 @@ export default function WhispersScreen() {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [pastSessions, setPastSessions] = useState<ChatSession[]>([]);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   // --- start a brand-new conversation with the mood-aware opener ----------
   const startNewSession = async (openingMood?: string | null) => {
@@ -121,9 +122,6 @@ export default function WhispersScreen() {
     await startNewSession(null);
   };
 
-  const lastIsWhisper =
-    messages.length > 0 && messages[messages.length - 1].role === 'whisper';
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" />
@@ -143,9 +141,9 @@ export default function WhispersScreen() {
           </View>
 
           <View style={styles.rightHeaderActions}>
-            <TouchableOpacity style={styles.whatIsBtn} activeOpacity={0.7} onPress={handleNewChat}>
-              <Text style={styles.whatIsText}>new chat</Text>
-              <Ionicons name="add" size={11} color={Colors.green.secondary} />
+            <TouchableOpacity style={styles.whatIsBtn} activeOpacity={0.7} onPress={() => setAboutOpen(true)}>
+              <Text style={styles.whatIsText}>what is whisper?</Text>
+              <Ionicons name="leaf" size={10} color={Colors.green.secondary} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.moreBtn} activeOpacity={0.6} onPress={openMenu}>
               <Ionicons name="ellipsis-vertical" size={18} color={Colors.text.secondary} />
@@ -192,18 +190,17 @@ export default function WhispersScreen() {
           })}
 
           {isTyping && <TypingIndicator />}
-
-          {/* Gentle prayer invitation after Whisper speaks */}
-          {lastIsWhisper && !isTyping && (
-            <TouchableOpacity style={styles.prayPill} onPress={handlePray} activeOpacity={0.8}>
-              <Ionicons name="leaf" size={13} color={Colors.green.primary} />
-              <Text style={styles.prayPillText}>pray with this</Text>
-            </TouchableOpacity>
-          )}
         </ScrollView>
 
         {/* Input bar */}
         <View style={styles.footer}>
+          {/* Persistent, user-initiated prayer. Whisper-initiated (discerned)
+              prayer offers arrive in L2. */}
+          <TouchableOpacity style={styles.prayBtn} onPress={handlePray} activeOpacity={0.8}>
+            <Ionicons name="leaf" size={13} color={Colors.green.primary} />
+            <Text style={styles.prayBtnText}>pray with me</Text>
+          </TouchableOpacity>
+
           <View style={styles.inputContainer}>
             <Ionicons name="leaf-outline" size={18} color={Colors.green.secondary} style={styles.inputLeaf} />
             <TextInput
@@ -261,6 +258,27 @@ export default function WhispersScreen() {
                 ))
               )}
             </ScrollView>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* What is Whisper? — gentle explainer */}
+      <Modal visible={aboutOpen} transparent animationType="fade" onRequestClose={() => setAboutOpen(false)}>
+        <Pressable style={styles.aboutOverlay} onPress={() => setAboutOpen(false)}>
+          <Pressable style={styles.aboutCard} onStartShouldSetResponder={() => true}>
+            <View style={styles.aboutIcon}>
+              <Ionicons name="leaf" size={22} color={Colors.green.primary} />
+            </View>
+            <Text style={styles.aboutTitle}>what is whisper?</Text>
+            <Text style={styles.aboutBody}>
+              Whisper is a safe place to be heard.{'\n\n'}
+              Talk about whatever's on your heart — no judgment, no rush. Whisper listens,
+              offers gentle words and scripture, and prays with you in God's presence.{'\n\n'}
+              Whatever you share stays here, in your sanctuary.
+            </Text>
+            <TouchableOpacity style={styles.aboutBtn} onPress={() => setAboutOpen(false)} activeOpacity={0.85}>
+              <Text style={styles.aboutBtnText}>okay 🌿</Text>
+            </TouchableOpacity>
           </Pressable>
         </Pressable>
       </Modal>
@@ -335,22 +353,23 @@ const styles = StyleSheet.create({
     fontSize: 9,
     color: Colors.text.muted,
   },
-  prayPill: {
+  prayBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    alignSelf: 'center',
+    alignSelf: 'flex-start',
     backgroundColor: Colors.green.faint,
     borderWidth: 1,
     borderColor: Colors.green.muted,
     borderRadius: Radius.pill,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    marginTop: Spacing.sm,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginBottom: Spacing.xs,
+    marginLeft: 4,
   },
-  prayPillText: {
+  prayBtnText: {
     fontFamily: 'Inter_600SemiBold',
-    fontSize: 12,
+    fontSize: 11,
     color: Colors.green.primary,
   },
   footer: {
@@ -459,4 +478,58 @@ const styles = StyleSheet.create({
     color: Colors.text.muted,
     marginTop: 1,
   },
+
+  // What is Whisper? modal
+  aboutOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.xl,
+  },
+  aboutCard: {
+    backgroundColor: Colors.bg.card,
+    borderRadius: Radius.lg,
+    padding: Spacing.lg,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border.default,
+    ...Shadows.float,
+  },
+  aboutIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: Colors.green.faint,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
+  aboutTitle: {
+    fontFamily: 'NotoSerif_700Bold',
+    fontSize: 20,
+    color: Colors.green.primary,
+    marginBottom: Spacing.sm,
+  },
+  aboutBody: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 13.5,
+    color: Colors.text.secondary,
+    lineHeight: 21,
+    textAlign: 'center',
+    marginBottom: Spacing.lg,
+  },
+  aboutBtn: {
+    backgroundColor: Colors.green.primary,
+    borderRadius: Radius.pill,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: 12,
+    ...Shadows.sm,
+  },
+  aboutBtnText: {
+    fontFamily: 'Inter_700Bold',
+    fontSize: 14,
+    color: Colors.white,
+  },
 });
+

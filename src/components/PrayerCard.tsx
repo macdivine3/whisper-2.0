@@ -4,6 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Colors, Radius, Shadows, Spacing } from '../constants/theme';
 import { Prayer, savePrayer } from '../lib/prayers';
+import { buildPrayerShare, shareText } from '../lib/share';
 import { useState } from 'react';
 
 const LEAF_IMAGE = require('../../assets/images/leaf-transparent.png');
@@ -41,6 +42,19 @@ export default function PrayerCard({ prayer }: Props) {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const ok = await savePrayer(prayer);
     if (ok) setSaved(true);
+  };
+
+  const handleShare = () => {
+    // L1: shares the prayer text. Upgrades to an image card with the dev build.
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    shareText(
+      buildPrayerShare({
+        title: prayer.title,
+        body: prayer.body,
+        verse: prayer.verse,
+        reference: prayer.reference,
+      })
+    );
   };
 
   return (
@@ -106,15 +120,9 @@ export default function PrayerCard({ prayer }: Props) {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.action} onPress={handleSave} activeOpacity={0.7}>
-            <Ionicons
-              name={saved ? 'checkmark-circle' : 'bookmark-outline'}
-              size={16}
-              color={saved ? Colors.green.primary : Colors.text.muted}
-            />
-            <Text style={[styles.actionText, saved && { color: Colors.green.primary }]}>
-              {saved ? 'saved' : 'Save'}
-            </Text>
+          <TouchableOpacity style={styles.action} onPress={handleShare} activeOpacity={0.7}>
+            <Ionicons name="share-social-outline" size={16} color={Colors.text.muted} />
+            <Text style={styles.actionText}>Share</Text>
           </TouchableOpacity>
         </View>
       </View>

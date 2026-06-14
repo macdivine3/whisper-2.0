@@ -51,6 +51,18 @@ export function buildNightWhisperShare(w: {
   return `${w.title}\n\n${w.message}\n\n"${w.whisper}"\n\n🌙 ${SIGN_OFF}`;
 }
 
+/** Build the share text for a prayer. (Image version comes with the dev build.) */
+export function buildPrayerShare(p: {
+  title: string;
+  body: string;
+  verse?: string;
+  reference?: string;
+}): string {
+  const ref = p.reference ? ` — ${p.reference}` : '';
+  const verse = p.verse ? `\n\n"${p.verse}"${ref}` : '';
+  return `${p.title}\n\n${p.body}${verse}\n\n🌿 ${SIGN_OFF}`;
+}
+
 /** Build the share text for a story (teaser — not the whole story). */
 export function buildStoryShare(s: {
   title: string;
