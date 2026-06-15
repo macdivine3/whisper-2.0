@@ -48,9 +48,9 @@ export default function HomeScreen() {
   const dailyNightWhisper = nightWhispers[getDailyIndex(nightWhispers.length)];
   const dailyStory = dailyStories[getDailyIndex(dailyStories.length)];
 
-  // Time of day decides which whisper shows: morning 8:00am–5:59pm, otherwise night.
+  // Time of day decides which whisper shows: morning 6:00am–5:59pm, otherwise night.
   const hour = new Date().getHours();
-  const isMorning = hour >= 8 && hour < 18;
+  const isMorning = hour >= 6 && hour < 18;
 
   const handleMoodSelect = (moodId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

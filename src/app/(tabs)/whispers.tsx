@@ -57,10 +57,23 @@ export default function WhispersScreen() {
 
   // --- start a brand-new conversation with the mood-aware opener ----------
   const startNewSession = async (openingMood?: string | null) => {
+    // 1. Create a "shadow" message locally so it shows INSTANTLY
+    const localOpener: ChatMessage = {
+      id: `temp-${Date.now()}`,
+      role: 'whisper',
+      text: getOpener(openingMood),
+      createdAt: Date.now(),
+      sessionId: 'pending',
+    };
+    
+    setMessages([localOpener]);
+    
+    // 2. Persist to database in the background
     const s = await createSession(openingMood);
-    const opener = await addMessage(s.id, 'whisper', getOpener(openingMood));
+    const realOpener = await addMessage(s.id, 'whisper', localOpener.text);
+    
     setSession(s);
-    setMessages([opener]);
+    setMessages([realOpener]);
   };
 
   // First mount: open a fresh session using the mood we arrived with.
@@ -70,8 +83,13 @@ export default function WhispersScreen() {
     startNewSession(mood ?? null);
   }, []);
 
-  const scrollToEnd = () =>
-    setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 60);
+  // Helper to ensure we are always at the bottom
+  const scrollToEnd = (animated = true) => {
+    // Small delay to ensure layout has calculated new size
+    setTimeout(() => {
+      scrollRef.current?.scrollToEnd({ animated });
+    }, 100);
+  };
 
   // --- send a message -----------------------------------------------------
   const handleSend = async () => {
@@ -84,14 +102,12 @@ export default function WhispersScreen() {
     setIsTyping(true);
     scrollToEnd();
 
+    // The typing indicator shows for the real duration of the AI call.
     const reply = await getWhisperReply([...messages, userMsg], session.openingMood);
-    // Unhurried: let the typing dots breathe before the reply lands.
-    setTimeout(async () => {
-      const wMsg = await addMessage(session.id, 'whisper', reply);
-      setIsTyping(false);
-      setMessages((prev) => [...prev, wMsg]);
-      scrollToEnd();
-    }, 1500);
+    const wMsg = await addMessage(session.id, 'whisper', reply);
+    setIsTyping(false);
+    setMessages((prev) => [...prev, wMsg]);
+    scrollToEnd();
   };
 
   // --- offer a prayer (user-triggered in L1; Claude-triggered in L2) ------
@@ -156,7 +172,7 @@ export default function WhispersScreen() {
           ref={scrollRef}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
-          onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}
+          onContentSizeChange={() => scrollToEnd(false)}
         >
           <View style={styles.dateSeparatorContainer}>
             <View style={styles.dateSeparatorPill}>
@@ -209,8 +225,9 @@ export default function WhispersScreen() {
               placeholderTextColor={Colors.text.muted}
               value={input}
               onChangeText={setInput}
-              onSubmitEditing={handleSend}
-              returnKeyType="send"
+              multiline={true}
+              blurOnSubmit={false}
+              maxHeight={120}
             />
             <TouchableOpacity
               style={[styles.sendButton, { backgroundColor: input.trim() ? Colors.green.primary : Colors.green.muted }]}

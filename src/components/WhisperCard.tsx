@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { Animated, Dimensions, Easing, Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Colors, Radius, Shadows, Spacing } from '../constants/theme';
-import { buildWhisperShare, shareText } from '../lib/share';
+import { buildWhisperShare, logSeed, shareText } from '../lib/share';
 
 const LEAF_BG = require('../../assets/images/leaf-transparent.png');
 const CANDLE_BG = require('../../svjs/candle-Photoroom.png');
@@ -40,7 +40,7 @@ export default function WhisperCard({
   // SET THIS TO 'true' IF YOU WANT TO SEE THE CANDLE RIGHT NOW REGARDLESS OF TIME
   const FORCE_NIGHT_MODE = false; 
 
-  const isNightWhisperTime = FORCE_NIGHT_MODE || (currentHour >= 18 || currentHour < 8); // 6 PM to 7:59 AM
+  const isNightWhisperTime = FORCE_NIGHT_MODE || (currentHour >= 18 || currentHour < 6); // 6 PM to 5:59 AM
   const activeBackground = isNightWhisperTime ? CANDLE_BG : LEAF_BG;
   const activeType = isNightWhisperTime ? 'night' : type;
 

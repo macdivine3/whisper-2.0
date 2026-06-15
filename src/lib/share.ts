@@ -4,8 +4,25 @@
 // "Grace Notes" cards are a separate future feature.
 
 import { Share } from 'react-native';
+import { supabase } from './supabase';
 
 const SIGN_OFF = 'Whisper — your safe sanctuary';
+
+/**
+ * Record a "seed sown" — every time the user shares something. Powers the
+ * Care Log's "Seeds Sown" insight. Fire-and-forget; never blocks the share.
+ */
+export async function logSeed(kind: 'whisper' | 'story' | 'prayer'): Promise<void> {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from('seeds').insert({ user_id: user.id, kind });
+  } catch {
+    // never let analytics break a share
+  }
+}
 
 /** Open the native share sheet with a block of text. Silently ignores cancel. */
 export async function shareText(message: string): Promise<void> {
