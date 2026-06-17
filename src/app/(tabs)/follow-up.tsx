@@ -1,8 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
+  Animated,
+  Dimensions,
+  Easing,
+  Modal,
   Platform,
+  Pressable,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -11,7 +17,8 @@ import {
   View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors, Shadows, Spacing } from '../../constants/theme';
+import * as Haptics from 'expo-haptics';
+import { Colors, Radius, Shadows, Spacing } from '../../constants/theme';
 
 // Import Refactored Components
 import FollowUpHero from '../../components/followup/FollowUpHero';
@@ -20,11 +27,84 @@ import CheckInCard from '../../components/followup/CheckInCard';
 import LastSharedCard from '../../components/followup/LastSharedCard';
 import GentleReminderCard from '../../components/followup/GentleReminderCard';
 import FollowUpActionsGrid from '../../components/followup/FollowUpActionsGrid';
+import CareLogTab from '../../components/followup/CareLogTab';
+import PrayerCard from '../../components/PrayerCard';
+
+// Libs
+import { getLatestMood } from '../../lib/mood';
+import { getLatestSessionSummary } from '../../lib/chat';
+import { getPersonalizedPrayer } from '../../lib/whisperVoice';
+import { Prayer } from '../../lib/prayers';
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export default function FollowUpScreen() {
   const router = useRouter();
   const [activeSubTab, setActiveSubTab] = useState<'checkin' | 'carelog' | 'reminders'>('checkin');
   const [selectedFeeling, setSelectedFeeling] = useState<string | null>(null);
+  const [latestMood, setLatestMood] = useState<string | null>(null);
+
+  useEffect(() => {
+    getLatestMood().then((m) => setLatestMood(m?.mood || null));
+  }, []);
+
+  // Prayer Modal State
+  const [prayerModalVisible, setPrayerModalVisible] = useState(false);
+  const [loadingPrayer, setLoadingPrayer] = useState(false);
+  const [activePrayer, setActivePrayer] = useState<Prayer | null>(null);
+  const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+
+  const handleFeelingSelect = (feeling: string) => {
+    setSelectedFeeling(feeling);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    // Navigate to chat with the 'followUpMood' param so Whisper can pick up the convo
+    router.push({ pathname: '/whispers', params: { followUpMood: feeling } });
+  };
+
+  const openPrayerModal = async () => {
+    setLoadingPrayer(true);
+    setPrayerModalVisible(true);
+    
+    // Animate up
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 600,
+      useNativeDriver: true,
+      easing: Easing.out(Easing.exp),
+    }).start();
+
+    try {
+      // Fetch context
+      const [moodData, summaryData] = await Promise.all([
+        getLatestMood(),
+        getLatestSessionSummary()
+      ]);
+
+      const prayer = await getPersonalizedPrayer(
+        "Mac Divine", // Hardcoded for now, like in Hero
+        moodData?.mood || null,
+        summaryData?.summary || null
+      );
+
+      setActivePrayer(prayer as Prayer);
+    } catch (e) {
+      console.warn('Failed to load prayer', e);
+    } finally {
+      setLoadingPrayer(false);
+    }
+  };
+
+  const closePrayerModal = () => {
+    Animated.timing(slideAnim, {
+      toValue: SCREEN_HEIGHT,
+      duration: 400,
+      useNativeDriver: true,
+      easing: Easing.in(Easing.ease),
+    }).start(() => {
+      setPrayerModalVisible(false);
+      setActivePrayer(null);
+    });
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -45,7 +125,7 @@ export default function FollowUpScreen() {
         </View>
 
         {/* Header Hero Section */}
-        <FollowUpHero />
+        <FollowUpHero onPrayPress={openPrayerModal} latestMood={latestMood} />
 
         {/* Sub Navigation Pills */}
         <FollowUpSubTabs
@@ -58,7 +138,7 @@ export default function FollowUpScreen() {
             {/* Check-in prompt */}
             <CheckInCard
               selectedFeeling={selectedFeeling}
-              onSelectFeeling={(feeling) => setSelectedFeeling(feeling)}
+              onSelectFeeling={handleFeelingSelect}
             />
 
             {/* You Last Shared */}
@@ -68,14 +148,12 @@ export default function FollowUpScreen() {
             <GentleReminderCard />
 
             {/* Quick Actions Grid & Explore Banner */}
-            <FollowUpActionsGrid />
+            <FollowUpActionsGrid onPrayPress={openPrayerModal} />
           </>
         )}
 
         {activeSubTab === 'carelog' && (
-          <View style={styles.emptyLogContainer}>
-            <Text style={styles.emptyLogText}>Your Care Log tracks your emotional history.</Text>
-          </View>
+          <CareLogTab />
         )}
 
         {activeSubTab === 'reminders' && (
@@ -86,6 +164,38 @@ export default function FollowUpScreen() {
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
+
+      {/* Personalized Prayer Modal */}
+      <Modal visible={prayerModalVisible} transparent animationType="none" onRequestClose={closePrayerModal}>
+        <Pressable style={styles.modalOverlay} onPress={closePrayerModal}>
+          <Animated.View
+            style={[styles.modalContent, { transform: [{ translateY: slideAnim }] }]}
+            onStartShouldSetResponder={() => true}
+          >
+            <View style={styles.modalHandle} />
+            
+            {loadingPrayer ? (
+              <View style={styles.modalLoading}>
+                <ActivityIndicator color={Colors.green.primary} size="large" />
+                <Text style={styles.loadingText}>preparing a prayer for you...</Text>
+              </View>
+            ) : activePrayer ? (
+              <View style={styles.prayerScrollWrapper}>
+                <ScrollView showsVerticalScrollIndicator={false}>
+                  <PrayerCard prayer={activePrayer} />
+                  <View style={{ height: 20 }} />
+                </ScrollView>
+              </View>
+            ) : null}
+
+            {!loadingPrayer && (
+              <TouchableOpacity style={styles.closeBtn} onPress={closePrayerModal}>
+                <Text style={styles.closeBtnText}>amen ❤️</Text>
+              </TouchableOpacity>
+            )}
+          </Animated.View>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -129,5 +239,55 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 100,
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: Colors.bg.primary,
+    borderTopLeftRadius: Radius.xl,
+    borderTopRightRadius: Radius.xl,
+    paddingBottom: Spacing.xl,
+    maxHeight: SCREEN_HEIGHT * 0.85,
+  },
+  modalHandle: {
+    width: 40,
+    height: 4,
+    backgroundColor: Colors.border.default,
+    borderRadius: Radius.pill,
+    alignSelf: 'center',
+    marginVertical: Spacing.md,
+  },
+  modalLoading: {
+    padding: Spacing.xxl,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+  },
+  loadingText: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 14,
+    color: Colors.text.muted,
+    fontStyle: 'italic',
+  },
+  prayerScrollWrapper: {
+    maxHeight: SCREEN_HEIGHT * 0.6,
+  },
+  closeBtn: {
+    backgroundColor: Colors.green.primary,
+    marginHorizontal: Spacing.lg,
+    paddingVertical: 16,
+    borderRadius: Radius.pill,
+    alignItems: 'center',
+    marginTop: Spacing.md,
+    ...Shadows.md,
+  },
+  closeBtnText: {
+    fontFamily: 'Inter_700Bold',
+    fontSize: 15,
+    color: Colors.white,
   },
 });

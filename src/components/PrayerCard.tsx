@@ -47,6 +47,7 @@ export default function PrayerCard({ prayer }: Props) {
   const handleShare = () => {
     // L1: shares the prayer text. Upgrades to an image card with the dev build.
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    logSeed('prayer');
     shareText(
       buildPrayerShare({
         title: prayer.title,

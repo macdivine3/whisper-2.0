@@ -48,10 +48,40 @@ function pick<T>(arr: T[], seed: number): T {
   return arr[Math.abs(seed) % arr.length];
 }
 
+const FOLLOW_UP_OPENERS: Record<string, string[]> = {
+  better: [
+    "i'm so glad to hear you're feeling a little better since we last talked 🌿 what's bringing that lightness to your heart?",
+    "it's good to see a little more light in you. what's been helping you feel a bit better?",
+  ],
+  same: [
+    "i hear you. sometimes things just stay steady for a while. what's been on your mind since we last spoke?",
+    "still in the same place? that's okay. i'm right here with you. want to talk about what's been consistent?",
+  ],
+  notgood: [
+    "i'm sorry it's been a hard stretch since we last talked… i'm here, and i'm listening. what's been the heaviest part?",
+    "hey… it sounds like things haven't been easy. you don't have to hold it all. what's making it feel 'not so good' today?",
+  ],
+  overwhelmed: [
+    "i hear you… it's still a lot to carry, isn't it? want to talk about what's still making you feel overwhelmed?",
+    "hey friend 🌿 i'm right here. let's take it one thing at a time. what's still piling up for you?",
+  ],
+  something: [
+    "hey 🌿 i'm listening. what's been going on since we last talked?",
+    "i'm here for you. whatever it is, you're safe here. what's on your heart right now?",
+  ],
+};
+
 /** The first thing Whisper says, chosen by the mood the user arrived with. */
 export function getOpener(mood?: string | null): string {
   const pool = (mood && OPENERS[mood]) || OPENERS.default;
   // Vary by time so repeat opens differ without persistent state.
+  const seed = Math.floor(Date.now() / 60000);
+  return pick(pool, seed);
+}
+
+/** A follow-up opener based on the feeling selected in the Follow-up screen. */
+export function getFollowUpOpener(feeling?: string | null): string {
+  const pool = (feeling && FOLLOW_UP_OPENERS[feeling]) || FOLLOW_UP_OPENERS.something;
   const seed = Math.floor(Date.now() / 60000);
   return pick(pool, seed);
 }
@@ -116,5 +146,83 @@ export async function getWhisperReply(
   } catch (e) {
     console.warn('[whisper] AI call threw, using fallback', e);
     return cannedReply(history, mood);
+  }
+}
+
+/**
+ * Ask Claude to write a 1-sentence gentle summary of the conversation highlight.
+ */
+export async function summarizeConversation(
+  history: ChatMessage[],
+  mood?: string | null
+): Promise<string | null> {
+  try {
+    const messages = toClaudeMessages(history);
+    if (messages.length < 2) return null; // No point in summarizing a hello
+
+    const prompt = "Briefly summarize what we just talked about in one gentle, 3rd-person sentence starting with 'You...'. Keep it soft and lowercase. No hashtags.";
+    
+    // Append the summary instruction as the last user message
+    const summaryMessages = [...messages, { role: 'user' as const, content: prompt }];
+
+    const { data, error } = await supabase.functions.invoke('whisper-chat', {
+      body: { messages: summaryMessages, mood },
+    });
+
+    if (error || !data?.reply) return null;
+    return data.reply.replace(/["']/g, '').trim(); // Strip quotes
+  } catch (e) {
+    console.warn('[whisper] summarization failed', e);
+    return null;
+  }
+}
+
+/**
+ * Generate a personalized prayer based on the user's name, latest mood, and
+ * the summary of their last conversation.
+ */
+export async function getPersonalizedPrayer(
+  name: string,
+  mood: string | null,
+  summary: string | null
+): Promise<{ title: string; body: string; verse?: string; reference?: string }> {
+  try {
+    const prompt = `Write a 3-sentence prayer for ${name}. 
+    Context: They are currently feeling "${mood || 'quiet'}" and our last talk was about: "${summary || 'life'}".
+    
+    IMPORTANT: Write it as if we (Whisper and ${name}) are praying TOGETHER to God right now. 
+    Use "we" and "us". Keep it soft, lowercase, and very gentle.
+    
+    Return the response as a JSON object with: 
+    { "title": "3-word title", "body": "the prayer text", "verse": "optional short verse", "reference": "verse reference" }`;
+
+    const { data, error } = await supabase.functions.invoke('whisper-chat', {
+      body: { 
+        messages: [{ role: 'user', content: prompt }], 
+        mood 
+      },
+    });
+
+    if (error || !data?.reply) {
+      throw new Error(error?.message || 'No reply');
+    }
+
+    // Claude might return markdown blocks or plain text; try to parse the JSON.
+    const jsonMatch = data.reply.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+    
+    // Fallback if parsing fails
+    return {
+      title: "a moment of peace",
+      body: data.reply,
+    };
+  } catch (e) {
+    console.warn('[whisper] prayer generation failed', e);
+    return {
+      title: "a gentle breath",
+      body: "lord, we come before you just as we are. thank you for being a safe place to land when the world feels heavy. walk with us in this moment. amen.",
+    };
   }
 }

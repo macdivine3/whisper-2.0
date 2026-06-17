@@ -5,7 +5,14 @@ import { Colors, Radius, Shadows, Spacing } from '../../constants/theme';
 
 const MAILBOX_IMAGE = require('../../../svjs/gemini-2.5-flash-image_Remove_the_background_completely_and_make_the_edges_of_the_illustration_fade_out-0-removebg-preview.png');
 
-export default function FollowUpHero() {
+interface Props {
+  onPrayPress?: () => void;
+  latestMood?: string | null;
+}
+
+export default function FollowUpHero({ onPrayPress, latestMood }: Props) {
+  const displayMood = latestMood || 'quiet';
+
   return (
     <View style={styles.heroSection}>
       <View style={styles.heroLeft}>
@@ -26,14 +33,18 @@ export default function FollowUpHero() {
               <View style={styles.memoryMessageRow}>
                 <Text style={styles.memoryMessage}>You've been feeling </Text>
                 <View style={styles.moodHighlightBg}>
-                  <Text style={styles.moodHighlightText}>overwhelmed.</Text>
+                  <Text style={styles.moodHighlightText}>{displayMood}.</Text>
                 </View>
               </View>
               <Text style={styles.memorySub}>I'm here to walk with you.</Text>
             </View>
           </View>
 
-          <TouchableOpacity style={styles.prayAboutItCard} activeOpacity={0.8}>
+          <TouchableOpacity 
+            style={styles.prayAboutItCard} 
+            activeOpacity={0.8}
+            onPress={onPrayPress}
+          >
             <Ionicons name="hand-right-outline" size={14} color={Colors.white} style={{ marginRight: 6 }} />
             <Text style={styles.prayAboutItText}>pray about it??</Text>
           </TouchableOpacity>

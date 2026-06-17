@@ -25,7 +25,7 @@ import MoodGrid from '../../components/MoodGrid';
 import { morningWhispers, nightWhispers, dailyStories } from '../../data/dailyContent';
 
 // Share helpers
-import { buildStoryShare, shareText } from '../../lib/share';
+import { buildStoryShare, shareText, logSeed } from '../../lib/share';
 
 // Mood logging
 import { logMood } from '../../lib/mood';
@@ -107,15 +107,16 @@ export default function HomeScreen() {
             title={dailyStory.title}
             excerpt={dailyStory.deepComment}
             onPress={() => router.push({ pathname: '/story', params: { id: dailyStory.id } })}
-            onSharePress={() =>
+            onSharePress={() => {
+              logSeed('story');
               shareText(
                 buildStoryShare({
                   title: dailyStory.title,
                   deepComment: dailyStory.deepComment,
                   verse: dailyStory.verse,
                 })
-              )
-            }
+              );
+            }}
           />
         </View>
 

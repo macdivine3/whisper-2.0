@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { Colors, Radius, Shadows, Spacing } from '../constants/theme';
 import { addEntry, moodPrompt, MOODS, moodColor } from '../lib/journal';
+import { logMood } from '../lib/mood';
 
 export default function JournalEntryScreen() {
   const router = useRouter();
@@ -41,6 +42,7 @@ export default function JournalEntryScreen() {
     setSaving(true);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     await addEntry({ title, body, mood });
+    await logMood(mood, 'journal');
     router.back();
   };
 

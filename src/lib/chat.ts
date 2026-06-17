@@ -21,6 +21,7 @@ export interface ChatMessage {
 export interface ChatSession {
   id: string;
   title: string;
+  summary?: string | null;
   openingMood?: string | null;
   createdAt: number;
   updatedAt: number;
@@ -78,6 +79,7 @@ async function applyOp(op: QueueOp, userId: string): Promise<boolean> {
         id: op.session.id,
         user_id: userId,
         title: op.session.title,
+        summary: op.session.summary ?? null,
         opening_mood: op.session.openingMood ?? null,
         created_at: new Date(op.session.createdAt).toISOString(),
         updated_at: new Date(op.session.updatedAt).toISOString(),
@@ -234,12 +236,13 @@ export async function getSessions(): Promise<ChatSession[]> {
     await flushQueue(userId);
     const { data, error } = await supabase
       .from('chat_sessions')
-      .select('id, title, opening_mood, created_at, updated_at')
+      .select('id, title, summary, opening_mood, created_at, updated_at')
       .order('updated_at', { ascending: false });
     if (!error && data) {
       const sessions: ChatSession[] = data.map((r: any) => ({
         id: r.id,
         title: r.title,
+        summary: r.summary,
         openingMood: r.opening_mood,
         createdAt: new Date(r.created_at).getTime(),
         updatedAt: new Date(r.updated_at).getTime(),
@@ -278,4 +281,58 @@ export async function getMessages(sessionId: string): Promise<ChatMessage[]> {
   }
   const all = await readAllMessages();
   return all[sessionId] ?? [];
+}
+
+/** Update a session with a short AI-generated summary. */
+export async function updateSessionSummary(sessionId: string, summary: string): Promise<void> {
+  // 1. Update local mirror
+  const sessions = await readSessions();
+  const next = sessions.map((s) => (s.id === sessionId ? { ...s, summary } : s));
+  await writeSessions(next);
+
+  // 2. Update Supabase
+  const userId = await currentUserId();
+  if (userId) {
+    const { error } = await supabase
+      .from('chat_sessions')
+      .update({ summary })
+      .eq('id', sessionId);
+    
+    if (error) {
+      console.warn('[chat] updateSessionSummary failed', error.message);
+    }
+  }
+}
+
+/** Get the summary of the most recent chat session. */
+export async function getLatestSessionSummary(): Promise<{ summary: string; date: number } | null> {
+  const userId = await currentUserId();
+  if (userId) {
+    const { data, error } = await supabase
+      .from('chat_sessions')
+      .select('summary, updated_at')
+      .not('summary', 'is', null)
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!error && data && data.summary) {
+      return {
+        summary: data.summary,
+        date: new Date(data.updated_at).getTime(),
+      };
+    }
+  }
+
+  // Fallback to local mirror
+  const sessions = await readSessions();
+  const latest = sessions.find((s) => s.summary);
+  if (latest && latest.summary) {
+    return {
+      summary: latest.summary,
+      date: latest.updatedAt,
+    };
+  }
+
+  return null;
 }

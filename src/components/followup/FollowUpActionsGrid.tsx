@@ -2,11 +2,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Colors, Radius, Spacing } from '../../constants/theme';
+import { shareText } from '../../lib/share';
 
 const { width } = Dimensions.get('window');
 
-export default function FollowUpActionsGrid() {
+interface Props {
+  onPrayPress?: () => void;
+}
+
+export default function FollowUpActionsGrid({ onPrayPress }: Props) {
   const router = useRouter();
+
+  const handleShareApp = async () => {
+    await shareText("This sanctuary has helped me find peace. I thought you might need it too. Join me on Whisper. Link: 123456");
+  };
 
   return (
     <View style={styles.container}>
@@ -27,13 +36,13 @@ export default function FollowUpActionsGrid() {
           <Text style={styles.gridCardSub}>open journal</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.gridCard} onPress={() => { }} activeOpacity={0.7}>
+        <TouchableOpacity style={styles.gridCard} onPress={onPrayPress} activeOpacity={0.7}>
           <Ionicons name="hand-right-outline" size={24} color={Colors.green.primary} style={styles.gridIcon} />
           <Text style={styles.gridCardTitle}>say a prayer</Text>
           <Text style={styles.gridCardSub}>pray together</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.gridCard} onPress={() => router.push('/whispers')} activeOpacity={0.7}>
+        <TouchableOpacity style={styles.gridCard} onPress={handleShareApp} activeOpacity={0.7}>
           <Ionicons name="heart-outline" size={24} color="#D15D5D" style={styles.gridIcon} />
           <Text style={styles.gridCardTitle}>share praise</Text>
           <Text style={styles.gridCardSub}>celebrate wins</Text>

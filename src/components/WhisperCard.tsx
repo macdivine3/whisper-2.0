@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Animated, Dimensions, Easing, Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Colors, Radius, Shadows, Spacing } from '../constants/theme';
@@ -31,6 +32,7 @@ export default function WhisperCard({
   whisper,
   onReadPress,
 }: WhisperCardProps) {
+  const router = useRouter();
   const [isLoved, setIsLoved] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const slideAnim = React.useRef(new Animated.Value(SCREEN_HEIGHT)).current;
@@ -73,8 +75,23 @@ export default function WhisperCard({
     }
   };
 
-  const handleShare = () =>
-    shareText(buildWhisperShare(activeType, { title, verse, reference, reflection, message, whisper }));
+  const handleShare = () => {
+    logSeed('whisper');
+    // Instead of basic text share, go to the immersive Grace Note screen
+    setModalVisible(false);
+    router.push({
+      pathname: '/grace-note',
+      params: {
+        type: activeType,
+        title,
+        verse,
+        reference,
+        reflection,
+        message,
+        whisper,
+      },
+    });
+  };
 
   return (
     <>

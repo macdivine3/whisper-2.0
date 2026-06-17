@@ -32,8 +32,9 @@ import {
   addMessage,
   getSessions,
   getMessages,
+  updateSessionSummary,
 } from '../../lib/chat';
-import { getOpener, getWhisperReply } from '../../lib/whisperVoice';
+import { getOpener, getFollowUpOpener, getWhisperReply, summarizeConversation } from '../../lib/whisperVoice';
 import { getPrayer, Prayer } from '../../lib/prayers';
 
 function formatTime(ts: number): string {
@@ -42,7 +43,7 @@ function formatTime(ts: number): string {
 
 export default function WhispersScreen() {
   const router = useRouter();
-  const { mood } = useLocalSearchParams<{ mood?: string }>();
+  const { mood, followUpMood } = useLocalSearchParams<{ mood?: string; followUpMood?: string }>();
   const scrollRef = useRef<ScrollView>(null);
   const initialized = useRef(false);
 
@@ -56,12 +57,16 @@ export default function WhispersScreen() {
   const [aboutOpen, setAboutOpen] = useState(false);
 
   // --- start a brand-new conversation with the mood-aware opener ----------
-  const startNewSession = async (openingMood?: string | null) => {
+  const startNewSession = async (openingMood?: string | null, isFollowUp = false) => {
     // 1. Create a "shadow" message locally so it shows INSTANTLY
+    const openerText = isFollowUp 
+      ? getFollowUpOpener(followUpMood) 
+      : getOpener(openingMood);
+
     const localOpener: ChatMessage = {
       id: `temp-${Date.now()}`,
       role: 'whisper',
-      text: getOpener(openingMood),
+      text: openerText,
       createdAt: Date.now(),
       sessionId: 'pending',
     };
@@ -80,7 +85,7 @@ export default function WhispersScreen() {
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
-    startNewSession(mood ?? null);
+    startNewSession(mood ?? null, !!followUpMood);
   }, []);
 
   // Helper to ensure we are always at the bottom
@@ -106,8 +111,19 @@ export default function WhispersScreen() {
     const reply = await getWhisperReply([...messages, userMsg], session.openingMood);
     const wMsg = await addMessage(session.id, 'whisper', reply);
     setIsTyping(false);
-    setMessages((prev) => [...prev, wMsg]);
+    
+    const newMessages = [...messages, userMsg, wMsg];
+    setMessages(newMessages);
     scrollToEnd();
+
+    // --- Background Memory Task ---
+    // Ask Claude to summarize this talk so far to power the Follow-up screen.
+    // We don't 'await' this so the UI stays snappy.
+    summarizeConversation(newMessages, session.openingMood).then((summary) => {
+      if (summary && session) {
+        updateSessionSummary(session.id, summary);
+      }
+    });
   };
 
   // --- offer a prayer (user-triggered in L1; Claude-triggered in L2) ------

@@ -1,23 +1,38 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Colors, Radius, Spacing } from '../../constants/theme';
+import { getLatestSessionSummary } from '../../lib/chat';
 
 export default function LastSharedCard() {
   const router = useRouter();
-  
+  const [data, setData] = useState<{ summary: string; date: number } | null>(null);
+
+  useEffect(() => {
+    getLatestSessionSummary().then(setData);
+  }, []);
+
+  if (!data) return null;
+
+  const formattedDate = new Date(data.date).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
   return (
     <View style={styles.container}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>YOU LAST SHARED</Text>
-        <Text style={styles.sharedDate}>May 16, 2025</Text>
+        <Text style={styles.sharedDate}>{formattedDate}</Text>
       </View>
 
       <View style={styles.sharedQuoteBox}>
         <View style={styles.sharedQuoteContent}>
           <Text style={styles.quoteMark}>“</Text>
           <Text style={styles.sharedQuoteText}>
-            "Everything just feels like too much.{'\n'}I feel like I'm failing in so many areas of my life."
+            {data.summary}
           </Text>
         </View>
 
