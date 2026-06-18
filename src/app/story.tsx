@@ -11,7 +11,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Radius, Shadows, Spacing } from '../constants/theme';
 import { dailyStories } from '../data/dailyContent';
-import { buildStoryShare, shareText } from '../lib/share';
 
 export default function StoryReaderScreen() {
   const router = useRouter();
@@ -23,13 +22,7 @@ export default function StoryReaderScreen() {
   const paragraphs = story.content.split('\n\n').filter((p) => p.trim().length > 0);
 
   const handleShare = () =>
-    shareText(
-      buildStoryShare({
-        title: story.title,
-        deepComment: story.deepComment,
-        verse: story.verse,
-      })
-    );
+    router.push({ pathname: '/story-card', params: { id: story.id } });
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
