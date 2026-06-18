@@ -16,6 +16,7 @@ import {
     NotoSerif_400Regular_Italic,
     NotoSerif_700Bold,
 } from "@expo-google-fonts/noto-serif";
+import { CormorantGaramond_700Bold_Italic, CormorantGaramond_600SemiBold } from "@expo-google-fonts/cormorant-garamond";
 
 import { ensureSession } from "../lib/supabase";
 
@@ -36,6 +37,8 @@ export default function RootLayout() {
     NotoSerif_400Regular,
     NotoSerif_700Bold,
     NotoSerif_400Regular_Italic,
+    CormorantGaramond_700Bold_Italic,
+    CormorantGaramond_600SemiBold,
   });
 
   // Hide splash once fonts are ready

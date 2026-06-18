@@ -25,15 +25,16 @@ const MORNING_BGS = {
   card_2: require('../../assets/grace_notes/card_2.jpg'),
 };
 
-// We want to alternate: [Dark, Cream, Dark, Cream...]
+// We want to alternate themes: [Editorial, Cream, Dark, Cream, Dark...]
 const NIGHT_BGS = [
-  { id: 'night_5', source: require('../../assets/grace_notes/night_5.jpg'), theme: 'dark' },
+  { id: 'night_5', source: require('../../assets/grace_notes/night_5.jpg'), theme: 'editorial' }, // The Chair & Lantern
   { id: 'night_1', source: require('../../assets/grace_notes/night_1.jpg'), theme: 'cream' },
   { id: 'night_6', source: require('../../assets/grace_notes/night_6.jpg'), theme: 'dark' },
   { id: 'night_2', source: require('../../assets/grace_notes/night_2.jpg'), theme: 'cream' },
   { id: 'night_7', source: require('../../assets/grace_notes/night_7.jpg'), theme: 'dark' },
   { id: 'night_3', source: require('../../assets/grace_notes/night_3.jpg'), theme: 'cream' }, // Journal Page
   { id: 'night_4', source: require('../../assets/grace_notes/night_4.png'), theme: 'cream' },
+  { id: 'night_8', source: require('../../assets/grace_notes/night_8.jpg'), theme: 'editorial' }, // The Chair & Lantern (warm)
 ];
 
 export default function GraceNoteScreen() {
@@ -54,8 +55,12 @@ export default function GraceNoteScreen() {
   const [bgIndex, setBgIndex] = useState(0);
 
   // Logic to get current background and theme
-  const currentBg = isNight ? NIGHT_BGS[bgIndex % NIGHT_BGS.length] : { id: morningKeys[bgIndex % morningKeys.length], source: (MORNING_BGS as any)[morningKeys[bgIndex % morningKeys.length]], theme: 'cream' };
+  const currentBg = isNight 
+    ? NIGHT_BGS[bgIndex % NIGHT_BGS.length] 
+    : { id: morningKeys[bgIndex % morningKeys.length], source: (MORNING_BGS as any)[morningKeys[bgIndex % morningKeys.length]], theme: 'cream' };
+  
   const isDarkTheme = currentBg.theme === 'dark';
+  const isEditorial = currentBg.theme === 'editorial';
   const isJournalPage = currentBg.id === 'night_3';
 
   const nextBg = () => {
@@ -77,10 +82,10 @@ export default function GraceNoteScreen() {
         style={styles.bgImage}
         resizeMode="cover"
       >
-        {/* Scrim for Dark backgrounds to ensure white text pops */}
-        {isDarkTheme && (
+        {/* Scrim for Dark/Editorial backgrounds to ensure white text pops */}
+        {(isDarkTheme || isEditorial) && (
           <LinearGradient
-            colors={['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.2)', 'rgba(0,0,0,0.5)']}
+            colors={['rgba(0,0,0,0.5)', 'rgba(0,0,0,0.2)', 'rgba(0,0,0,0.6)']}
             style={StyleSheet.absoluteFill}
           />
         )}
@@ -103,28 +108,49 @@ export default function GraceNoteScreen() {
           {/* The Grace Note Content */}
           <View style={styles.contentWrapper}>
             {isNight ? (
-              // Night Layout
-              <View style={styles.nightContentContainer}>
-                <Text style={[
-                  styles.nightMainText,
-                  isDarkTheme ? styles.textGlow : styles.textInk,
-                  isJournalPage && styles.journalText
-                ]}>
-                  {mainText}
-                </Text>
-                
-                <View style={styles.footerCenter}>
-                  <Text style={[
-                    styles.footerText,
-                    isDarkTheme ? styles.footerGlow : styles.footerInk,
-                    isJournalPage && styles.journalFooter
-                  ]}>
-                    whisper | your safe sanctuary
-                  </Text>
+              isEditorial ? (
+                // --- Logic C: Editorial Style (Fancy + Heart Line) ---
+                <View style={styles.editorialContainer}>
+                  <Text style={styles.scriptTitle}>night whispers</Text>
+
+                  <View style={styles.editorialContent}>
+                    <Text style={styles.part1Text}>{mainText}</Text>
+
+                    <View style={styles.heartLineContainer}>
+                      <View style={styles.heartLine} />
+                      <Ionicons name="heart" size={14} color="#D15D5D" style={{ marginHorizontal: 16 }} />
+                      <View style={styles.heartLine} />
+                    </View>
+                  </View>
+
+                  <View style={styles.footerCenterEditorial}>
+                    <Text style={styles.footerTextGlow}>whisper | your safe sanctuary</Text>
+                  </View>
                 </View>
-              </View>
+              ) : (
+                // --- Logic B: Standard Night Layout ---
+                <View style={styles.nightContentContainer}>
+                  <Text style={[
+                    styles.nightMainText,
+                    isDarkTheme ? styles.textGlow : styles.textInk,
+                    isJournalPage && styles.journalText
+                  ]}>
+                    {mainText}
+                  </Text>
+                  
+                  <View style={styles.footerCenter}>
+                    <Text style={[
+                      styles.footerText,
+                      isDarkTheme ? styles.footerGlow : styles.footerInk,
+                      isJournalPage && styles.journalFooter
+                    ]}>
+                      whisper | your safe sanctuary
+                    </Text>
+                  </View>
+                </View>
+              )
             ) : (
-              // Morning Layout (Always Cream Card style)
+              // --- Logic A: Morning Layout (Always Cream Card style) ---
               <View style={currentBg.id.startsWith('plain') ? styles.graceCard : styles.overlayTextContainer}>
                 <Text style={styles.mainText}>{mainText}</Text>
                 <View style={styles.divider} />
@@ -201,6 +227,42 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 40,
+  },
+  // --- EDITORIAL STYLE (The Chair & Lantern Look) ---
+  editorialContainer: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  scriptTitle: {
+    fontFamily: 'CormorantGaramond_700Bold_Italic',
+    fontSize: 34,
+    color: '#F9F1E6',
+    marginBottom: 40,
+  },
+  editorialContent: {
+    alignItems: 'center',
+    width: '100%',
+  },
+  part1Text: {
+    fontFamily: 'CormorantGaramond_600SemiBold',
+    fontSize: 30,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    lineHeight: 40,
+  },
+  heartLineContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '60%',
+    marginTop: 32,
+  },
+  heartLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+  },
+  footerCenterEditorial: {
+    marginTop: 60,
   },
   // --- NIGHT STYLES ---
   nightContentContainer: {
