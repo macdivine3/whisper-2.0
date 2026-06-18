@@ -1,9 +1,15 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors, Radius, Spacing, Shadows } from '../constants/theme';
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
+import {
+    ImageBackground,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { Colors, Radius, Shadows, Spacing } from "../constants/theme";
 
-const STORY_BG = require('../../assets/images/story-bg.png');
+const STORY_BG = require("../../assets/images/story-bg.png");
 
 interface StoryCardProps {
   title?: string;
@@ -39,9 +45,12 @@ export default function StoryCard({
           <View style={styles.badge}>
             <Text style={styles.badgeText}>today's story</Text>
           </View>
-          <TouchableOpacity onPress={() => setIsLoved(!isLoved)} activeOpacity={0.6}>
+          <TouchableOpacity
+            onPress={() => setIsLoved(!isLoved)}
+            activeOpacity={0.6}
+          >
             <Ionicons
-              name={isLoved ? 'heart' : 'heart-outline'}
+              name={isLoved ? "heart" : "heart-outline"}
               size={18}
               color={Colors.white}
             />
@@ -56,9 +65,17 @@ export default function StoryCard({
 
         {/* Bottom Row */}
         <View style={styles.bottomRow}>
-          <TouchableOpacity style={styles.actionRow} onPress={onPress} activeOpacity={0.6}>
+          <TouchableOpacity
+            style={styles.actionRow}
+            onPress={onPress}
+            activeOpacity={0.6}
+          >
             <Text style={styles.actionText}>read full story</Text>
-            <Ionicons name="arrow-forward-outline" size={13} color={Colors.white} />
+            <Ionicons
+              name="arrow-forward-outline"
+              size={13}
+              color={Colors.white}
+            />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -66,7 +83,11 @@ export default function StoryCard({
             onPress={onSharePress}
             activeOpacity={0.7}
           >
-            <Ionicons name="share-social-outline" size={14} color={Colors.text.secondary} />
+            <Ionicons
+              name="share-social-outline"
+              size={14}
+              color={Colors.text.secondary}
+            />
           </TouchableOpacity>
         </View>
       </ImageBackground>
@@ -78,16 +99,16 @@ const styles = StyleSheet.create({
   touchable: {
     marginHorizontal: Spacing.lg,
     marginTop: Spacing.xs,
-    marginBottom: 32, // Breathing space before "how are you feeling"
+    marginBottom: 24, // Reduced breathing space before footer
 
     borderRadius: 16,
-    overflow: 'hidden',
+    overflow: "hidden",
     ...Shadows.md,
   },
   card: {
-    padding: 16, // Shrink internal padding
-    minHeight: 180, // Shrink min height
-    position: 'relative',
+    padding: 12, // Shrink internal padding
+    minHeight: 160, // Shrink min height
+    position: "relative",
   },
   cardImage: {
     borderRadius: 16,
@@ -95,14 +116,14 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(140, 80, 20, 0.18)',
+    backgroundColor: "rgba(140, 80, 20, 0.18)",
     borderRadius: 16,
   },
   topRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
   },
   badge: {
     backgroundColor: Colors.green.primary,
@@ -111,38 +132,38 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   badgeText: {
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: "Inter_600SemiBold",
     fontSize: 10,
     color: Colors.white,
     letterSpacing: 0.2,
   },
   content: {
-    marginBottom: 12,
+    marginBottom: 8,
   },
   title: {
-    fontFamily: 'NotoSerif_700Bold',
+    fontFamily: "NotoSerif_700Bold",
     fontSize: 22,
     color: Colors.white,
-    marginBottom: 2,
-    lineHeight: 28,
+    marginBottom: 4,
+    lineHeight: 24,
   },
   excerpt: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.92)',
-    lineHeight: 18,
+    fontFamily: "Inter_400Regular",
+    fontSize: 12,
+    color: "rgba(255,255,255,0.92)",
+    lineHeight: 24,
   },
   bottomRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   actionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   actionText: {
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: "Inter_600SemiBold",
     fontSize: 12,
     color: Colors.white,
     marginRight: 4,
@@ -151,8 +172,8 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: 'rgba(255,255,255,0.82)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255,255,255,0.82)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

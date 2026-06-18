@@ -22,7 +22,7 @@ export default function StoryReaderScreen() {
   const paragraphs = story.content.split('\n\n').filter((p) => p.trim().length > 0);
 
   const handleShare = () =>
-    router.push({ pathname: '/story-card', params: { id: story.id } });
+    router.push({ pathname: '/storyshare-card', params: { id: story.id } });
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>

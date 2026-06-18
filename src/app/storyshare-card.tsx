@@ -79,6 +79,9 @@ export default function StoryCardScreen() {
             <Text style={styles.excerpt}>{`“${excerpt}”`}</Text>
           </View>
 
+          {/* Spacer pushes footer to the bottom, but keeps a min gap on long excerpts */}
+          <View style={styles.spacer} />
+
           {/* Footer */}
           <Text style={styles.footer}>
             shared from whisper · the safe retreat sanctuary
@@ -177,11 +180,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 48,
   },
+  spacer: {
+    flex: 1,
+    minHeight: 40,
+  },
   footer: {
-    position: 'absolute',
-    bottom: 28,
-    left: 32,
-    right: 32,
+    paddingHorizontal: 32,
+    paddingBottom: 28,
     fontFamily: 'CormorantGaramond_700Bold_Italic',
     fontSize: 15,
     letterSpacing: 1,
